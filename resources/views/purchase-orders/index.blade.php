@@ -82,15 +82,24 @@
                     <tbody class="divide-y divide-slate-100">
                         @forelse ($orders as $order)
                             @php
-                                $total = collect($order['items'])->sum(fn ($item) => $item['qty'] * $item['price']);
-                                $firstItem = $order['items'][0];
-                                $remaining = max(0, count($order['items']) - 1);
-                                $sequence = preg_match('/^(\d+)\//', $order['number'], $match) ? $match[1] : $loop->iteration;
+                                $total           = collect($order['items'])->sum(fn ($item) => $item['qty'] * $item['price']);
+                                $firstItem       = $order['items'][0];
+                                $remaining       = max(0, count($order['items']) - 1);
+                                // Kolom NO = urutan tampil di list (1, 2, 3...)
+                                $sequence        = $loop->iteration;
+                                // Hitung status supplier semua item
+                                $allItems        = collect($order['items']);
+                                $hasAnySupplier  = $allItems->contains(fn ($i) => $i['supplier'] !== '-' && $i['supplier'] !== null);
+                                $allHaveSupplier = $allItems->every(fn ($i) => $i['supplier'] !== '-' && $i['supplier'] !== null);
                             @endphp
                             <tr class="hover:bg-slate-50/70">
                                 <td class="px-5 py-5 text-center text-xs font-black text-slate-400">{{ $sequence }}</td>
                                 <td class="px-5 py-5">
-                                    <a href="{{ route('purchase-orders.show', $order['id']) }}" class="block max-w-64 truncate text-xs font-black text-slate-950">{{ $order['number'] }}</a>
+                                    @if ($order['number'])
+                                        <a href="{{ route('purchase-orders.show', $order['id']) }}" class="block max-w-64 truncate text-xs font-black text-slate-950">{{ $order['number'] }}</a>
+                                    @else
+                                        <a href="{{ route('purchase-orders.show', $order['id']) }}" class="block max-w-64 truncate text-xs font-black italic text-slate-400">Menunggu Validasi</a>
+                                    @endif
                                     <div class="mt-2 flex items-center gap-2">
                                         <span class="rounded bg-blue-50 px-2 py-1 text-[9px] font-black uppercase tracking-wider text-blue-600">{{ $order['created_by'] }}</span>
                                         <span class="text-[10px] font-black text-slate-400">{{ date('m/d/Y', strtotime($order['date'])) }}</span>
@@ -106,9 +115,17 @@
                                     @if (! empty($firstItem['request']))
                                         <p class="mt-1 text-[10px] font-bold italic text-slate-400">"{{ $firstItem['request'] }}"</p>
                                     @endif
-                                    <p class="mt-1 max-w-44 truncate text-[9px] font-black uppercase text-emerald-600">
-                                        Supplier OK <span class="ml-2 text-blue-600">{{ $firstItem['supplier'] }}</span>
-                                    </p>
+                                    {{-- Status supplier --}}
+                                    @if ($allHaveSupplier)
+                                        <p class="mt-1 text-[9px] font-black uppercase text-emerald-600">
+                                            Supplier OK
+                                            <span class="ml-1 text-blue-600">{{ $firstItem['supplier'] }}</span>
+                                        </p>
+                                    @elseif ($hasAnySupplier)
+                                        <p class="mt-1 text-[9px] font-black uppercase text-orange-500">Partial Supplier</p>
+                                    @else
+                                        <p class="mt-1 text-[9px] font-black uppercase text-rose-500">No Supplier</p>
+                                    @endif
                                 </td>
                                 <td class="px-5 py-5 text-xs font-black text-slate-900">
                                     {{ collect($order['items'])->sum('qty') }} <span class="text-[10px] uppercase text-slate-400">{{ $firstItem['unit'] }}</span>

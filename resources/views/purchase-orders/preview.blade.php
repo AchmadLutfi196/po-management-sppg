@@ -3,12 +3,18 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Preview Purchase Order - {{ $order['number'] }}</title>
+        <title>Purchase Order - {{ $order['number'] }}</title>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <style>
             @page {
                 size: A4;
-                margin: 14mm;
+                margin: 10mm 15mm;
+            }
+            @media print {
+                body {
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
             }
         </style>
     </head>
@@ -25,108 +31,120 @@
                 <h1 class="text-xl font-black tracking-tight text-slate-900">Preview Purchase Order</h1>
             </div>
             <div class="flex items-center gap-3">
-                <button type="button" onclick="window.print()" class="rounded-lg border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700 shadow-sm">Print</button>
-                <button type="button" onclick="window.print()" class="rounded-lg bg-red-600 px-5 py-3 text-sm font-black text-white shadow-sm shadow-red-600/20">Download PDF</button>
+                <button type="button" onclick="window.print()" class="rounded-lg border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700 shadow-sm transition hover:bg-slate-50">Print</button>
             </div>
         </header>
 
-        <main class="mx-auto max-w-[920px] px-4 py-10 print:max-w-none print:p-0">
-            <article class="min-h-[1120px] bg-white p-12 shadow-2xl shadow-slate-300/60 print:min-h-0 print:p-0 print:shadow-none">
-                <section class="flex items-start justify-between gap-8">
+        <main class="mx-auto max-w-[850px] px-4 py-10 print:max-w-none print:p-0">
+            <article class="min-h-[1120px] bg-white p-12 shadow-xl shadow-slate-200 print:min-h-0 print:p-0 print:shadow-none">
+                <!-- Header Dokumen -->
+                <header class="mb-8 flex items-start justify-between border-b-2 border-slate-900 pb-6">
                     <div>
-                        <p class="text-3xl font-black tracking-tight text-slate-950">PURCHASE ORDER</p>
-                        <p class="mt-2 text-lg font-black uppercase tracking-[0.2em] text-slate-500">{{ $order['number'] }}</p>
+                        <h2 class="text-3xl font-black uppercase tracking-widest text-slate-900">CV. SPPG</h2>
+                        <p class="mt-1 text-sm font-medium text-slate-600">Sistem Manajemen Purchase Order</p>
                     </div>
                     <div class="text-right">
-                        <p class="text-2xl font-black text-blue-600">CV. SPPG</p>
-                        <p class="mt-2 text-xs font-black uppercase tracking-[0.2em] text-slate-400">Tgl PO: {{ date('d M Y', strtotime($order['date'])) }}</p>
+                        <h1 class="text-3xl font-black uppercase tracking-tight text-slate-900">Purchase Order</h1>
+                        <p class="mt-2 text-base font-bold text-slate-700">{{ $order['number'] }}</p>
                     </div>
-                </section>
+                </header>
 
-                <div class="mt-8 border-t-2 border-slate-950"></div>
-
-                <section class="mt-9 grid grid-cols-4 gap-4">
-                    <div>
-                        <p class="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Dibuat Oleh</p>
-                        <div class="min-h-14 rounded-lg border border-slate-100 bg-slate-50 px-4 py-3 text-sm font-black">{{ $order['created_by'] }}</div>
-                    </div>
-                    <div>
-                        <p class="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Kode SPPG</p>
-                        <div class="min-h-14 rounded-lg border border-slate-100 bg-slate-50 px-4 py-3 text-sm font-black">{{ $order['sppg_code'] }} ({{ $order['sppg'] }})</div>
-                    </div>
-                    <div>
-                        <p class="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Tgl Drop</p>
-                        <div class="min-h-14 rounded-lg border border-slate-100 bg-slate-50 px-4 py-3 text-sm font-black">{{ $dropDate }}</div>
-                    </div>
-                    <div>
-                        <p class="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Jam Drop</p>
-                        <div class="min-h-14 rounded-lg border border-slate-100 bg-slate-50 px-4 py-3 text-sm font-black">{{ $dropTime }}</div>
-                    </div>
-                    <div class="col-span-2">
-                        <p class="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">No. PO</p>
-                        <div class="min-h-14 truncate rounded-lg border border-slate-100 bg-slate-50 px-4 py-3 text-sm font-black">{{ $order['number'] }}</div>
-                    </div>
-                    <div>
-                        <p class="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Status</p>
-                        <div class="min-h-14 rounded-lg border border-slate-100 bg-slate-50 px-4 py-3 text-sm font-black">{{ $order['status'] }}</div>
-                    </div>
-                    <div>
-                        <p class="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Daftar Supplier</p>
-                        <div class="flex min-h-14 flex-wrap gap-1 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-[10px] font-black uppercase text-blue-600">
-                            @foreach ($suppliers as $supplier)
-                                <span class="rounded border border-blue-100 bg-white px-2 py-1">{{ $supplier }}</span>
-                            @endforeach
-                        </div>
-                    </div>
-                </section>
-
-                <section class="mt-10 overflow-hidden border border-slate-200">
-                    <table class="w-full table-fixed">
-                        <thead class="bg-slate-950 text-white">
+                <!-- Informasi Utama -->
+                <div class="mb-8 grid grid-cols-2 gap-8">
+                    <!-- Detail PO -->
+                    <table class="w-full text-sm">
+                        <tbody>
                             <tr>
-                                <th class="w-12 px-3 py-4 text-left text-[10px] font-black uppercase tracking-[0.18em]">No</th>
-                                <th class="px-3 py-4 text-left text-[10px] font-black uppercase tracking-[0.18em]">Nama Barang</th>
-                                <th class="w-20 px-3 py-4 text-center text-[10px] font-black uppercase tracking-[0.18em]">Qty</th>
-                                <th class="w-24 px-3 py-4 text-center text-[10px] font-black uppercase tracking-[0.18em]">Satuan</th>
-                                <th class="w-40 px-3 py-4 text-left text-[10px] font-black uppercase tracking-[0.18em]">Supplier</th>
-                                <th class="w-36 px-3 py-4 text-right text-[10px] font-black uppercase tracking-[0.18em]">Request / Grade</th>
+                                <td class="py-1.5 w-32 font-bold text-slate-500 uppercase text-xs tracking-wider">Tanggal PO</td>
+                                <td class="py-1.5 font-bold text-slate-900">: {{ date('d F Y', strtotime($order['date'])) }}</td>
                             </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-200">
-                            @foreach ($order['items'] as $item)
-                                <tr>
-                                    <td class="px-3 py-5 text-center text-sm">{{ $loop->iteration }}</td>
-                                    <td class="px-3 py-5 text-sm font-black uppercase">
-                                        {{ $item['name'] }}
-                                        @if (! empty($item['request']))
-                                            <p class="mt-1 text-xs font-medium italic text-slate-500">{{ $item['request'] }}</p>
-                                        @endif
-                                    </td>
-                                    <td class="px-3 py-5 text-center text-sm font-black">{{ $item['qty'] }}</td>
-                                    <td class="px-3 py-5 text-center text-sm uppercase">{{ $item['unit'] }}</td>
-                                    <td class="px-3 py-5 text-xs font-black uppercase text-blue-600">{{ $item['supplier'] }}</td>
-                                    <td class="px-3 py-5 text-right">
-                                        <span class="rounded bg-emerald-50 px-2 py-1 text-[10px] font-black uppercase text-emerald-600">Grade: {{ $item['grade'] }}</span>
-                                    </td>
-                                </tr>
-                            @endforeach
+                            <tr>
+                                <td class="py-1.5 w-32 font-bold text-slate-500 uppercase text-xs tracking-wider">Status</td>
+                                <td class="py-1.5 font-bold text-slate-900">: {{ $order['status'] }}</td>
+                            </tr>
+                            <tr>
+                                <td class="py-1.5 w-32 font-bold text-slate-500 uppercase text-xs tracking-wider">Dibuat Oleh</td>
+                                <td class="py-1.5 font-bold text-slate-900">: {{ $order['created_by'] }}</td>
+                            </tr>
                         </tbody>
                     </table>
-                </section>
 
-                <section class="mt-16 grid grid-cols-2 gap-10 text-center">
+                    <!-- Detail Pengiriman -->
+                    <table class="w-full text-sm">
+                        <tbody>
+                            <tr>
+                                <td class="py-1.5 w-32 font-bold text-slate-500 uppercase text-xs tracking-wider">Kode SPPG</td>
+                                <td class="py-1.5 font-bold text-slate-900">: {{ $order['sppg_code'] }} ({{ $order['sppg'] }})</td>
+                            </tr>
+                            <tr>
+                                <td class="py-1.5 w-32 font-bold text-slate-500 uppercase text-xs tracking-wider">Tgl Drop</td>
+                                <td class="py-1.5 font-bold text-slate-900">: {{ $dropDate }}</td>
+                            </tr>
+                            <tr>
+                                <td class="py-1.5 w-32 font-bold text-slate-500 uppercase text-xs tracking-wider">Jam Drop</td>
+                                <td class="py-1.5 font-bold text-slate-900">: {{ $dropTime }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Informasi Supplier (jika ada lebih dari 1, tampilkan sebagai info tambahan) -->
+                <div class="mb-6">
+                    <p class="mb-1 text-xs font-bold uppercase tracking-wider text-slate-500">Supplier Tujuan:</p>
+                    <p class="text-sm font-bold text-slate-900">{{ $suppliers->implode(', ') }}</p>
+                </div>
+
+                <!-- Tabel Barang -->
+                <table class="w-full border-collapse border border-slate-400">
+                    <thead class="bg-slate-100">
+                        <tr>
+                            <th class="border border-slate-400 py-3 text-center text-xs font-bold uppercase tracking-wider text-slate-800 w-12">No</th>
+                            <th class="border border-slate-400 px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-800">Nama Barang / Deskripsi</th>
+                            <th class="border border-slate-400 py-3 text-center text-xs font-bold uppercase tracking-wider text-slate-800 w-24">Qty</th>
+                            <th class="border border-slate-400 py-3 text-center text-xs font-bold uppercase tracking-wider text-slate-800 w-24">Satuan</th>
+                            <th class="border border-slate-400 px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-800 w-40">Supplier</th>
+                            <th class="border border-slate-400 px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-800 w-40">Request / Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm">
+                        @foreach ($order['items'] as $item)
+                            <tr>
+                                <td class="border border-slate-400 py-3 text-center">{{ $loop->iteration }}</td>
+                                <td class="border border-slate-400 px-4 py-3">
+                                    <div class="font-bold uppercase text-slate-900">{{ $item['name'] }}</div>
+                                </td>
+                                <td class="border border-slate-400 py-3 text-center font-bold text-slate-900">{{ $item['qty'] }}</td>
+                                <td class="border border-slate-400 py-3 text-center uppercase">{{ $item['unit'] }}</td>
+                                <td class="border border-slate-400 px-4 py-3 uppercase text-slate-700">{{ $item['supplier'] }}</td>
+                                <td class="border border-slate-400 px-4 py-3">
+                                    @if(!empty($item['grade']))
+                                        <div class="text-xs font-bold uppercase text-slate-800">Grade: {{ $item['grade'] }}</div>
+                                    @endif
+                                    @if(!empty($item['request']))
+                                        <div class="mt-0.5 text-xs italic text-slate-600">{{ $item['request'] }}</div>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+
+                <!-- Kolom Tanda Tangan -->
+                <div class="mt-20 grid grid-cols-2 text-center text-sm font-bold">
                     <div>
-                        <p class="mb-16 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Dibuat Oleh,</p>
-                        <div class="border-t border-slate-900 pt-4 text-sm font-black">SPPG (ADMIN)</div>
+                        <p class="mb-20 uppercase text-slate-600">Dibuat Oleh,</p>
+                        <p class="border-b border-slate-400 mx-16 pb-1">SPPG (ADMIN)</p>
                     </div>
                     <div>
-                        <p class="mb-16 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Menyetujui,</p>
-                        <div class="border-t border-slate-900 pt-4 text-sm font-black">(....................)</div>
+                        <p class="mb-20 uppercase text-slate-600">Menyetujui,</p>
+                        <p class="border-b border-slate-400 mx-16 pb-1 text-transparent">.</p>
+                        <p class="mt-1 text-xs font-normal text-slate-500">( Tanda Tangan & Nama Terang )</p>
                     </div>
-                </section>
+                </div>
 
-                <footer class="mt-24 border-t border-slate-200 pt-6 text-center text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                    Dokumen ini dihasilkan secara otomatis melalui sistem manajemen PO CV. SPPG
+                <!-- Footer Dokumen -->
+                <footer class="mt-16 border-t border-slate-300 pt-4 text-center text-xs text-slate-400">
+                    <p>Dokumen ini dicetak otomatis dari Sistem PO Manajemen CV. SPPG pada {{ now()->format('d/m/Y H:i') }}</p>
                 </footer>
             </article>
         </main>

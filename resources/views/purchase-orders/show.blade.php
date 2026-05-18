@@ -13,16 +13,20 @@
                 <div class="flex items-start gap-4">
                     <span class="mt-1 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-lg font-black text-white">P</span>
                     <div>
-                        <h1 class="text-2xl font-black tracking-tight text-slate-950">Detail Pesanan: {{ $order['number'] }}</h1>
+                        <h1 class="text-2xl font-black tracking-tight text-slate-950">Detail Pesanan: {{ $order['number'] ?? 'Belum Diterbitkan' }}</h1>
                         <div class="mt-2">@include('partials.status-badge', ['status' => $order['status']])</div>
                     </div>
                 </div>
                 <div class="flex items-center gap-4">
-                    @if ($currentUser['role'] === 'ADMIN')
-                        <button type="submit" form="supplier-assignment-form" class="rounded-lg bg-emerald-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-emerald-600/20">Simpan Penugasan Supplier</button>
+                    @if ($currentUser['role'] === 'ADMIN' && ! $order['number'])
+                        <button type="submit" form="supplier-assignment-form" class="rounded-lg bg-emerald-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-emerald-600/20">
+                            Simpan Penugasan &amp; Terbitkan No. PO
+                        </button>
                     @endif
-                    <a href="{{ route('purchase-orders.preview', $order['id']) }}" class="rounded-lg border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-black text-slate-600">Cetak PDF</a>
-                    <a href="{{ route('purchase-orders.index') }}" class="text-3xl leading-none text-slate-400 hover:text-slate-700">×</a>
+                    @if ($order['number'])
+                        <a href="{{ route('purchase-orders.preview', $order['id']) }}" class="rounded-lg border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-black text-slate-600">Cetak PDF</a>
+                    @endif
+                    <a href="{{ route('purchase-orders.index') }}" class="text-3xl leading-none text-slate-400 hover:text-slate-700">&times;</a>
                 </div>
             </header>
 
@@ -45,7 +49,15 @@
                                 </div>
                                 <div class="flex items-center justify-between gap-6">
                                     <dt class="text-xs font-black uppercase tracking-widest text-slate-400">No. PO</dt>
-                                    <dd class="text-base font-black text-slate-700">{{ $order['number'] }}</dd>
+                                    <dd>
+                                        @if ($order['number'])
+                                            <span class="text-base font-black text-slate-700">{{ $order['number'] }}</span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-black text-amber-600 border border-amber-200">
+                                                ⚠ Belum Diterbitkan — Tentukan supplier terlebih dahulu
+                                            </span>
+                                        @endif
+                                    </dd>
                                 </div>
                             </dl>
                         </section>
@@ -120,7 +132,12 @@
                         </table>
                     </div>
                 </section>
-                @if ($currentUser['role'] === 'ADMIN')
+                @if ($currentUser['role'] === 'ADMIN' && ! $order['number'])
+                    <div class="sticky bottom-0 -mx-9 -mb-6 flex items-center justify-between border-t border-amber-200 bg-amber-50 px-9 py-4 text-xs font-black uppercase tracking-[0.18em] text-amber-700">
+                        <span>⚠ Tentukan supplier untuk semua item agar nomor PO diterbitkan dan status berubah ke PROCESSING.</span>
+                        <button type="submit" class="underline underline-offset-4">Simpan & Terbitkan</button>
+                    </div>
+                @elseif ($currentUser['role'] === 'ADMIN')
                     <div class="sticky bottom-0 -mx-9 -mb-6 flex items-center justify-between border-t border-emerald-100 bg-emerald-50 px-9 py-4 text-xs font-black uppercase tracking-[0.18em] text-emerald-700">
                         <span>Terdapat perubahan penugasan supplier yang bisa disimpan.</span>
                         <button type="submit" class="underline underline-offset-4">Simpan Sekarang</button>

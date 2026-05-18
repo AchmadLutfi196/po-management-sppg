@@ -90,7 +90,9 @@
                             <th class="px-5 py-4 text-left text-xs font-black uppercase tracking-[0.16em] text-slate-400">Qty</th>
                             <th class="px-5 py-4 text-left text-xs font-black uppercase tracking-[0.16em] text-slate-400">Satuan</th>
                             <th class="px-5 py-4 text-left text-xs font-black uppercase tracking-[0.16em] text-slate-400">Harga Satuan</th>
-                            <th class="px-5 py-4 text-left text-xs font-black uppercase tracking-[0.16em] text-slate-400">Supplier</th>
+                            @if (($currentUser['role'] ?? '') !== 'SPPG')
+                                <th class="px-5 py-4 text-left text-xs font-black uppercase tracking-[0.16em] text-slate-400">Supplier</th>
+                            @endif
                             <th class="px-5 py-4 text-left text-xs font-black uppercase tracking-[0.16em] text-slate-400">Catatan</th>
                             <th class="px-5 py-4 text-center text-xs font-black uppercase tracking-[0.16em] text-slate-400">Aksi</th>
                         </tr>
@@ -103,14 +105,21 @@
                                 <td class="px-5 py-4">
                                     <input type="hidden" name="items[{{ $itemIndex }}][id]" value="{{ $item['id'] ?? '' }}">
                                     <input type="hidden" name="items[{{ $itemIndex }}][name]" value="{{ old("items.$itemIndex.name", $item['name'] ?? '') }}">
-                                    <select name="items[{{ $itemIndex }}][stock_item_id]" class="w-52 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-black text-slate-800 outline-none focus:border-blue-500">
-                                        <option value="">Pilih...</option>
+                                    <select name="items[{{ $itemIndex }}][stock_item_id]" class="stock-item-select w-52 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-black text-slate-800 outline-none focus:border-blue-500">
+                                        <option value="" data-unit="KG" data-name="">Pilih...</option>
                                         @foreach ($stockItems as $stock)
-                                            <option value="{{ $stock['id'] }}" @selected((string) old("items.$itemIndex.stock_item_id", $item['stock_item_id'] ?? '') === (string) $stock['id'] || (($item['name'] ?? '') === $stock['name'] && empty($item['stock_item_id'])))>{{ $stock['name'] }}</option>
+                                            <option value="{{ $stock['id'] }}" data-unit="{{ $stock['unit'] ?? 'KG' }}" data-name="{{ $stock['name'] }}" @selected((string) old("items.$itemIndex.stock_item_id", $item['stock_item_id'] ?? '') === (string) $stock['id'] || (($item['name'] ?? '') === $stock['name'] && empty($item['stock_item_id'])))>{{ $stock['name'] }}</option>
                                         @endforeach
                                     </select>
                                 </td>
-                                <td class="px-5 py-4"><input name="items[{{ $itemIndex }}][grade]" value="{{ old("items.$itemIndex.grade", $item['grade'] ?? 'A') }}" class="w-20 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-black text-slate-800 outline-none"></td>
+                                <td class="px-5 py-4">
+                                    <select name="items[{{ $itemIndex }}][grade]" class="w-20 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-black text-slate-800 outline-none focus:border-blue-500">
+                                        <option value="A" @selected(old("items.$itemIndex.grade", $item['grade'] ?? 'A') === 'A')>A</option>
+                                        <option value="B" @selected(old("items.$itemIndex.grade", $item['grade'] ?? '') === 'B')>B</option>
+                                        <option value="C" @selected(old("items.$itemIndex.grade", $item['grade'] ?? '') === 'C')>C</option>
+                                        <option value="REJECT" @selected(old("items.$itemIndex.grade", $item['grade'] ?? '') === 'REJECT')>REJECT</option>
+                                    </select>
+                                </td>
                                 <td class="px-5 py-4"><input name="items[{{ $itemIndex }}][qty]" type="number" min="0.01" step="0.01" value="{{ old("items.$itemIndex.qty", $item['qty'] ?? 0) }}" class="w-20 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-black text-slate-800 outline-none"></td>
                                 <td class="px-5 py-4"><input name="items[{{ $itemIndex }}][unit]" value="{{ old("items.$itemIndex.unit", strtoupper($item['unit'] ?? 'KG')) }}" class="w-24 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-black text-slate-800 outline-none"></td>
                                 <td class="px-5 py-4">
@@ -119,14 +128,16 @@
                                         <input name="items[{{ $itemIndex }}][price]" type="text" inputmode="numeric" data-currency-input value="{{ old("items.$itemIndex.price", $item['price'] ?? 0) }}" class="min-w-0 flex-1 bg-transparent text-sm font-black text-slate-800 outline-none">
                                     </div>
                                 </td>
-                                <td class="px-5 py-4">
-                                    <select name="items[{{ $itemIndex }}][supplier]" class="w-36 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-black text-slate-800 outline-none focus:border-blue-500">
-                                        <option value="">Supplier...</option>
-                                        @foreach ($suppliers as $supplier)
-                                            <option value="{{ $supplier }}" @selected(old("items.$itemIndex.supplier", $item['supplier'] ?? '') === $supplier)>{{ $supplier }}</option>
-                                        @endforeach
-                                    </select>
-                                </td>
+                                @if (($currentUser['role'] ?? '') !== 'SPPG')
+                                    <td class="px-5 py-4">
+                                        <select name="items[{{ $itemIndex }}][supplier]" class="w-36 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-black text-slate-800 outline-none focus:border-blue-500">
+                                            <option value="">Supplier...</option>
+                                            @foreach ($suppliers as $supplier)
+                                                <option value="{{ $supplier }}" @selected(old("items.$itemIndex.supplier", $item['supplier'] ?? '') === $supplier)>{{ $supplier }}</option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                @endif
                                 <td class="px-5 py-4"><input name="items[{{ $itemIndex }}][request]" value="{{ old("items.$itemIndex.request", $item['request'] ?? '') }}" placeholder="Catatan..." class="w-44 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-600 outline-none"></td>
                                 <td class="px-5 py-4 text-center">
                                     <button type="button" class="remove-item-btn p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Hapus Barang">
@@ -147,12 +158,80 @@
         const tbody = document.getElementById('items-tbody');
         const btnAdd = document.getElementById('add-item-btn');
         const itemsCountLabel = document.getElementById('items-count');
-        let itemIndexCounter = {{ count($items) || 1 }};
+        let itemIndexCounter = {{ count($items) }};
+
+        // Data stock items untuk dipakai di template baris baru
+        const stockItems = @json($stockItems);
+        @if (($currentUser['role'] ?? '') !== 'SPPG')
+        const suppliers = @json($suppliers);
+        @else
+        const suppliers = [];
+        @endif
+        const isSppg = {{ ($currentUser['role'] ?? '') === 'SPPG' ? 'true' : 'false' }};
+
+        function buildStockOptions() {
+            let html = '<option value="" data-unit="KG" data-name="">Pilih...</option>';
+            stockItems.forEach(function (s) {
+                html += `<option value="${s.id}" data-unit="${s.unit ?? 'KG'}" data-name="${s.name}">${s.name}</option>`;
+            });
+            return html;
+        }
+
+        function buildSupplierOptions() {
+            let html = '<option value="">Supplier...</option>';
+            suppliers.forEach(function (s) {
+                html += `<option value="${s}">${s}</option>`;
+            });
+            return html;
+        }
+
+        function buildNewRow(idx) {
+            const supplierCol = isSppg ? '' : `
+                <td class="px-5 py-4">
+                    <select name="items[${idx}][supplier]" class="w-36 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-black text-slate-800 outline-none focus:border-blue-500">
+                        ${buildSupplierOptions()}
+                    </select>
+                </td>`;
+
+            return `<tr>
+                <td class="px-5 py-4 text-xs font-black text-slate-400"></td>
+                <td class="px-5 py-4">
+                    <input type="hidden" name="items[${idx}][id]" value="">
+                    <input type="hidden" name="items[${idx}][name]" value="">
+                    <select name="items[${idx}][stock_item_id]" class="stock-item-select w-52 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-black text-slate-800 outline-none focus:border-blue-500">
+                        ${buildStockOptions()}
+                    </select>
+                </td>
+                <td class="px-5 py-4">
+                    <select name="items[${idx}][grade]" class="w-20 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-black text-slate-800 outline-none focus:border-blue-500">
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="REJECT">REJECT</option>
+                    </select>
+                </td>
+                <td class="px-5 py-4"><input name="items[${idx}][qty]" type="number" min="0.01" step="0.01" value="0" class="w-20 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-black text-slate-800 outline-none"></td>
+                <td class="px-5 py-4"><input name="items[${idx}][unit]" value="KG" class="w-24 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-black text-slate-800 outline-none"></td>
+                <td class="px-5 py-4">
+                    <div class="flex w-32 items-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+                        <span class="mr-2 text-[10px] font-black text-slate-400">Rp.</span>
+                        <input name="items[${idx}][price]" type="text" inputmode="numeric" value="0" class="min-w-0 flex-1 bg-transparent text-sm font-black text-slate-800 outline-none">
+                    </div>
+                </td>
+                ${supplierCol}
+                <td class="px-5 py-4"><input name="items[${idx}][request]" value="" placeholder="Catatan..." class="w-44 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-600 outline-none"></td>
+                <td class="px-5 py-4 text-center">
+                    <button type="button" class="remove-item-btn p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Hapus Barang">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                    </button>
+                </td>
+            </tr>`;
+        }
 
         function updateRowNumbersAndButtons() {
             const rows = tbody.querySelectorAll('tr');
-            if(itemsCountLabel) itemsCountLabel.textContent = rows.length;
-            rows.forEach((row, index) => {
+            if (itemsCountLabel) itemsCountLabel.textContent = rows.length;
+            rows.forEach(function (row, index) {
                 row.querySelector('td:first-child').textContent = index + 1;
                 const removeBtn = row.querySelector('.remove-item-btn');
                 if (removeBtn) {
@@ -169,35 +248,10 @@
 
         updateRowNumbersAndButtons();
 
-        if(btnAdd) {
+        if (btnAdd) {
             btnAdd.addEventListener('click', function () {
-                const firstRow = tbody.querySelector('tr');
-                if (!firstRow) return;
-
-                const newRow = firstRow.cloneNode(true);
-                const inputs = newRow.querySelectorAll('input, select');
-                
-                inputs.forEach(input => {
-                    if (input.tagName === 'SELECT') {
-                        input.selectedIndex = 0;
-                    } else if (input.type !== 'hidden' || input.name.includes('[id]')) {
-                        if (input.name.includes('[qty]') || input.name.includes('[price]')) {
-                            input.value = 0;
-                        } else if (input.name.includes('[unit]')) {
-                            input.value = 'KG';
-                        } else if (input.name.includes('[grade]')) {
-                            input.value = 'A';
-                        } else {
-                            input.value = '';
-                        }
-                    }
-
-                    if (input.name) {
-                        input.name = input.name.replace(/\[\d+\]/, '[' + itemIndexCounter + ']');
-                    }
-                });
-
-                tbody.appendChild(newRow);
+                const newRowHtml = buildNewRow(itemIndexCounter);
+                tbody.insertAdjacentHTML('beforeend', newRowHtml);
                 itemIndexCounter++;
                 updateRowNumbersAndButtons();
             });
@@ -213,5 +267,23 @@
                 }
             }
         });
+
+        tbody.addEventListener('change', function (e) {
+            if (e.target.classList.contains('stock-item-select')) {
+                const tr = e.target.closest('tr');
+                const selectedOption = e.target.options[e.target.selectedIndex];
+
+                const unitInput = tr.querySelector('input[name$="[unit]"]');
+                if (unitInput && selectedOption.dataset.unit) {
+                    unitInput.value = selectedOption.dataset.unit;
+                }
+
+                const nameInput = tr.querySelector('input[name$="[name]"]');
+                if (nameInput && selectedOption.dataset.name !== undefined) {
+                    nameInput.value = selectedOption.dataset.name;
+                }
+            }
+        });
     });
 </script>
+

@@ -2,23 +2,30 @@
 
 @section('content')
     @php
-        $delivery = $order['delivery'] ?? [];
+        $delivery    = $order['delivery'] ?? [];
         $hasDelivery = ! empty($order['delivery']);
-        $firstSupplier = collect($order['items'])->pluck('supplier')->filter(fn ($supplier) => $supplier !== '-')->first() ?? 'DUNIA BUMBU MOJOKERTO';
-        $sjNumber = $delivery['number'] ?? 'SJ/2026/'.random_int(100, 999);
+
+        $firstSupplier = collect($order['items'])->pluck('supplier')->filter(fn ($s) => $s !== '-')->first() ?? '-';
+        $sjNumber      = $delivery['number'] ?? 'SJ/'.now()->format('Y').'/'.random_int(100, 999);
+
+        // Prioritas: data delivery yg sudah tersimpan → data SPPG dari database → fallback
+        $kepada       = $delivery['kepada']    ?? $sppg['name'];          // ← nama SPPG, bukan location
+        $kdSppg       = $delivery['kd_sppg']   ?? $sppg['code'];
+        $namaSppg     = $delivery['nama_sppg'] ?? $sppg['name'];
+        $pjSppg       = $delivery['pj_sppg']   ?? $sppg['pic_name'];
+        $whatsapp     = $delivery['whatsapp']  ?? $sppg['whatsapp'];
+
+        // Tanggal kirim default dari droping_date PO, bukan hari ini
+        $deliveryDate = $delivery['date'] ?? ($order['droping_date'] ?? now()->format('Y-m-d'));
+        $driver       = $delivery['driver'] ?? '';
+        $notes        = $delivery['notes']  ?? '';
+
         $title = $hasDelivery ? 'Detail Surat Jalan: '.$sjNumber : 'Buat Surat Jalan: '.$order['number'];
-        $kepada = $delivery['kepada'] ?? str_replace('SPPG-', '', $order['sppg']);
-        $kdSppg = $delivery['kd_sppg'] ?? $order['sppg_code'];
-        $namaSppg = $delivery['nama_sppg'] ?? str_replace('SPPG-', '', $order['sppg']);
-        $pjSppg = $delivery['pj_sppg'] ?? '';
-        $whatsapp = $delivery['whatsapp'] ?? '';
-        $deliveryDate = $delivery['date'] ?? now()->format('Y-m-d');
-        $driver = $delivery['driver'] ?? '';
-        $notes = $delivery['notes'] ?? '';
     @endphp
 
+
     <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/45 p-4 backdrop-blur-sm">
-        <form method="POST" action="{{ route('surat-jalan.update', $order['id']) }}" class="mx-auto max-h-[calc(100vh-2rem)] max-w-[1020px] overflow-y-auto rounded-2xl bg-slate-100 shadow-2xl">
+        <form method="POST" action="{{ route('surat-jalan.update', $order['id']) }}" enctype="multipart/form-data" class="mx-auto max-h-[calc(100vh-2rem)] max-w-[1020px] overflow-y-auto rounded-2xl bg-slate-100 shadow-2xl">
             @csrf
             @method('PATCH')
 
@@ -93,21 +100,34 @@
                 <section class="space-y-7">
                     <div class="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-md shadow-slate-200/70">
                         <p class="mb-4 text-xs font-black uppercase tracking-[0.16em] text-slate-400">Upload Foto Bukti/Drop Barang</p>
-                        @if ($hasDelivery)
-                            <div class="mx-auto h-56 max-w-sm overflow-hidden rounded-xl bg-gradient-to-br from-slate-200 via-blue-100 to-emerald-100 p-4">
-                                <div class="grid h-full grid-cols-5 gap-2">
-                                    @for ($i = 0; $i < 20; $i++)
-                                        <div class="rounded bg-white/70 shadow-sm"></div>
-                                    @endfor
-                                </div>
-                            </div>
-                            <button type="button" class="mt-4 w-full rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-black text-rose-500">Hapus & Ganti Foto</button>
-                        @else
-                            <div class="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-slate-100 text-4xl text-slate-300">□</div>
+                        @php
+                            $proofPhoto = $order['delivery']['proof_photo'] ?? null;
+                        @endphp
+                        
+                        <div id="main-proof-container" class="{{ $proofPhoto ? 'mx-auto h-56 max-w-sm overflow-hidden rounded-xl bg-gradient-to-br from-slate-200 via-blue-100 to-emerald-100 p-2 relative group' : 'mx-auto relative group h-24 w-24' }}">
+                            <img id="main-proof-preview" src="{{ $proofPhoto ? asset('storage/'.$proofPhoto) : '#' }}" alt="Foto Bukti" class="{{ $proofPhoto ? 'h-full w-full object-cover rounded-lg shadow-sm' : 'hidden h-full w-full object-cover rounded-2xl shadow-sm' }}" data-original="{{ $proofPhoto ? asset('storage/'.$proofPhoto) : '' }}">
+                            
+                            @if (!$proofPhoto)
+                                <div id="main-proof-placeholder" class="flex h-full w-full items-center justify-center rounded-2xl bg-slate-100 text-4xl text-slate-300">□</div>
+                            @else
+                                <div id="main-proof-placeholder" class="hidden h-full w-full items-center justify-center rounded-xl bg-slate-100 text-4xl text-slate-300">□</div>
+                            @endif
+                            
+                            <button type="button" id="btn-remove-main" class="hidden absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-md hover:bg-red-600 focus:outline-none" title="Batal Pilih Foto">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                            </button>
+                        </div>
+                        
+                        <div id="main-proof-texts" class="{{ $proofPhoto ? 'hidden' : 'block' }}">
                             <p class="mt-4 text-base font-black text-slate-900">Belum ada foto bukti</p>
                             <p class="mt-2 text-xs font-semibold text-slate-500">Gunakan foto dokumen fisik SJ atau foto barang saat di drop.</p>
-                            <button type="button" class="mt-5 rounded-lg bg-blue-600 px-7 py-3 text-sm font-black text-white shadow-lg shadow-blue-600/20">Ambil / Pilih Foto</button>
-                        @endif
+                        </div>
+
+                        <label id="lbl-upload-main" class="{{ $proofPhoto ? 'mt-4 w-full rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-black text-rose-500 inline-flex cursor-pointer items-center justify-center transition hover:bg-rose-100' : 'mt-5 inline-flex cursor-pointer items-center justify-center rounded-lg bg-blue-600 px-7 py-3 text-sm font-black text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700' }}">
+                            <span id="lbl-upload-main-text">{{ $proofPhoto ? 'Hapus & Ganti Foto' : 'Ambil / Pilih Foto' }}</span>
+                            <input type="file" name="proof_photo" accept="image/*" class="hidden" id="main-photo-input">
+                        </label>
+                        <span id="lbl-main-filename" class="mt-2 block w-full truncate text-xs font-semibold text-emerald-600"></span>
                     </div>
 
                     <div class="rounded-2xl bg-emerald-600 p-7 text-white shadow-2xl shadow-emerald-500/20">
@@ -140,7 +160,8 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
-                            @foreach ($order['items'] as $item)
+                            @foreach ($order['items'] as $itemIdx => $item)
+                                @php $existingPhoto = $order['delivery']['item_photos'][$itemIdx] ?? null; @endphp
                                 <tr>
                                     <td class="px-7 py-5 text-base font-black text-slate-900">{{ $item['name'] }}</td>
                                     <td class="px-7 py-5"><input name="qty_actual[]" type="number" value="{{ $item['qty'] }}" class="w-24 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-black text-slate-800 outline-none focus:border-blue-500"></td>
@@ -160,26 +181,29 @@
                                     </td>
                                     <td class="px-7 py-5 text-sm font-semibold text-slate-500">{{ $item['request'] ?? '-' }}</td>
                                     <td class="px-7 py-5">
-                                        <div class="flex items-center gap-3">
-                                            @if ($hasDelivery)
-                                                <div class="grid h-12 w-14 shrink-0 grid-cols-3 gap-0.5 overflow-hidden rounded-lg border border-slate-200 bg-gradient-to-br from-slate-100 to-blue-100 p-1">
-                                                    @for ($i = 0; $i < 6; $i++)
-                                                        <span class="rounded-sm bg-white/80"></span>
-                                                    @endfor
-                                                </div>
-                                            @else
-                                                <div class="flex h-12 w-14 shrink-0 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-xs font-black text-slate-300">
-                                                    IMG
-                                                </div>
-                                            @endif
-                                            <label class="inline-flex cursor-pointer items-center justify-center rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-blue-600 transition hover:border-blue-200 hover:bg-blue-100">
-                                                Upload
-                                                <input type="file" accept="image/*" class="hidden">
+                                        <div class="flex flex-col items-start gap-2">
+                                            <div class="relative h-14 w-16 shrink-0">
+                                                @if ($existingPhoto)
+                                                    <img id="img-preview-{{ $itemIdx }}" src="{{ asset('storage/'.$existingPhoto) }}" alt="Foto" class="h-full w-full rounded-lg object-cover border border-slate-200 shadow-sm" data-original="{{ asset('storage/'.$existingPhoto) }}">
+                                                    <div id="img-placeholder-{{ $itemIdx }}" class="hidden h-full w-full items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-[10px] font-black text-slate-300">FOTO</div>
+                                                @else
+                                                    <img id="img-preview-{{ $itemIdx }}" src="#" alt="Preview" class="hidden h-full w-full rounded-lg object-cover border border-slate-200 shadow-sm" data-original="">
+                                                    <div id="img-placeholder-{{ $itemIdx }}" class="flex h-full w-full items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-[10px] font-black text-slate-300">FOTO</div>
+                                                @endif
+                                                <button type="button" id="btn-remove-{{ $itemIdx }}" class="hidden absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-md hover:bg-red-600 focus:outline-none" title="Batal Pilih Foto">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                                </button>
+                                            </div>
+                                            <label id="lbl-upload-{{ $itemIdx }}" class="inline-flex cursor-pointer items-center justify-center gap-1 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-blue-600 transition hover:border-blue-200 hover:bg-blue-100">
+                                                {{ $existingPhoto ? 'Ganti' : 'Upload' }}
+                                                <input type="file" name="item_photos[{{ $itemIdx }}]" accept="image/*" class="hidden photo-input" data-idx="{{ $itemIdx }}">
                                             </label>
                                         </div>
                                     </td>
                                 </tr>
                             @endforeach
+
+
                         </tbody>
                     </table>
                 </div>
@@ -194,4 +218,117 @@
             </footer>
         </form>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const photoInputs = document.querySelectorAll('.photo-input');
+            photoInputs.forEach(input => {
+                input.addEventListener('change', function () {
+                    const idx = this.getAttribute('data-idx');
+                    const imgPreview = document.getElementById('img-preview-' + idx);
+                    const imgPlaceholder = document.getElementById('img-placeholder-' + idx);
+                    const btnRemove = document.getElementById('btn-remove-' + idx);
+                    const lblUpload = document.getElementById('lbl-upload-' + idx);
+
+                    if (this.files && this.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            imgPreview.src = e.target.result;
+                            imgPreview.classList.remove('hidden');
+                            imgPlaceholder.classList.add('hidden');
+                            imgPlaceholder.classList.remove('flex');
+                            btnRemove.classList.remove('hidden');
+                            lblUpload.classList.add('hidden'); 
+                        }
+                        reader.readAsDataURL(this.files[0]);
+                    }
+                });
+            });
+
+            document.querySelectorAll('button[id^="btn-remove-"]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const idx = this.id.replace('btn-remove-', '');
+                    const input = document.querySelector('input[data-idx="'+idx+'"]');
+                    const imgPreview = document.getElementById('img-preview-' + idx);
+                    const imgPlaceholder = document.getElementById('img-placeholder-' + idx);
+                    const lblUpload = document.getElementById('lbl-upload-' + idx);
+
+                    input.value = ''; // clear input file
+
+                    const originalSrc = imgPreview.getAttribute('data-original');
+                    if (originalSrc) {
+                        imgPreview.src = originalSrc;
+                        imgPreview.classList.remove('hidden');
+                        imgPlaceholder.classList.add('hidden');
+                        imgPlaceholder.classList.remove('flex');
+                    } else {
+                        imgPreview.src = '#';
+                        imgPreview.classList.add('hidden');
+                        imgPlaceholder.classList.remove('hidden');
+                        imgPlaceholder.classList.add('flex');
+                    }
+
+                    this.classList.add('hidden');
+                    lblUpload.classList.remove('hidden'); 
+                });
+            });
+
+            // Handle main proof photo upload
+            const mainPhotoInput = document.getElementById('main-photo-input');
+            if (mainPhotoInput) {
+                const mainPreview = document.getElementById('main-proof-preview');
+                const mainPlaceholder = document.getElementById('main-proof-placeholder');
+                const btnRemoveMain = document.getElementById('btn-remove-main');
+                const lblUploadMain = document.getElementById('lbl-upload-main');
+                const mainTexts = document.getElementById('main-proof-texts');
+                const container = document.getElementById('main-proof-container');
+                const filenameSpan = document.getElementById('lbl-main-filename');
+
+                mainPhotoInput.addEventListener('change', function () {
+                    if (this.files && this.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            mainPreview.src = e.target.result;
+                            mainPreview.classList.remove('hidden');
+                            mainPlaceholder.classList.add('hidden');
+                            mainPlaceholder.classList.remove('flex');
+                            btnRemoveMain.classList.remove('hidden');
+                            lblUploadMain.classList.add('hidden');
+                            
+                            if(mainTexts) mainTexts.classList.add('hidden');
+                            filenameSpan.textContent = mainPhotoInput.files[0].name;
+
+                            // Adjust container style to match active state
+                            container.className = 'mx-auto h-56 max-w-sm overflow-hidden rounded-xl bg-gradient-to-br from-slate-200 via-blue-100 to-emerald-100 p-2 relative group';
+                        }
+                        reader.readAsDataURL(this.files[0]);
+                    }
+                });
+
+                btnRemoveMain.addEventListener('click', function() {
+                    mainPhotoInput.value = '';
+                    filenameSpan.textContent = '';
+
+                    const originalSrc = mainPreview.getAttribute('data-original');
+                    if (originalSrc) {
+                        mainPreview.src = originalSrc;
+                        mainPreview.classList.remove('hidden');
+                        mainPlaceholder.classList.add('hidden');
+                        mainPlaceholder.classList.remove('flex');
+                        container.className = 'mx-auto h-56 max-w-sm overflow-hidden rounded-xl bg-gradient-to-br from-slate-200 via-blue-100 to-emerald-100 p-2 relative group';
+                    } else {
+                        mainPreview.src = '#';
+                        mainPreview.classList.add('hidden');
+                        mainPlaceholder.classList.remove('hidden');
+                        mainPlaceholder.classList.add('flex');
+                        container.className = 'mx-auto relative group h-24 w-24';
+                        if(mainTexts) mainTexts.classList.remove('hidden');
+                    }
+
+                    this.classList.add('hidden');
+                    lblUploadMain.classList.remove('hidden');
+                });
+            }
+        });
+    </script>
 @endsection

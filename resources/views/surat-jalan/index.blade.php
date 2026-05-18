@@ -29,7 +29,7 @@
                     <tbody class="divide-y divide-slate-100">
                         @forelse ($orders as $order)
                             @php
-                                $sequence = preg_match('/^(\d+)\//', $order['number'], $match) ? $match[1] : $loop->iteration;
+                                $sequence    = $loop->iteration;
                                 $hasDelivery = ! empty($order['delivery']);
                                 $supplierCount = collect($order['items'])->pluck('supplier')->unique()->count();
                             @endphp

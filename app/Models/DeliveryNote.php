@@ -18,6 +18,7 @@ class DeliveryNote extends Model
         'pj_sppg',
         'whatsapp',
         'notes',
+        'proof_photo',
         'item_photos',
         'has_photo',
     ];
