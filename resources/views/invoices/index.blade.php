@@ -27,7 +27,7 @@
                         <tbody class="divide-y divide-slate-100">
                             @forelse ($pendingInvoices as $entry)
                                 <tr class="hover:bg-slate-50/70">
-                                    <td class="px-5 py-7 text-center text-xs font-black text-slate-400">{{ $loop->iteration }}</td>
+                                    <td class="px-5 py-7 text-center text-xs font-black text-slate-400">{{ ($pendingInvoices->firstItem() ?? 1) + $loop->index }}</td>
                                     <td class="px-5 py-7">
                                         <p class="text-sm font-black uppercase text-slate-950">{{ $entry['supplier'] }}</p>
                                         <p class="mt-1 text-xs font-black text-slate-700">Ref PO: {{ $entry['order']['number'] }}</p>
@@ -65,6 +65,11 @@
                         </tbody>
                     </table>
                 </div>
+                @if ($pendingInvoices->hasPages())
+                    <div class="border-t border-slate-100 px-5 py-4">
+                        {{ $pendingInvoices->links() }}
+                    </div>
+                @endif
             </section>
         @else
             <section class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -104,7 +109,7 @@
                             @forelse ($historyInvoices as $entry)
                                 @php($invoice = $entry['invoice'])
                                 <tr class="hover:bg-slate-50/70">
-                                    <td class="px-5 py-6 text-center text-xs font-black text-slate-400">{{ $loop->iteration }}</td>
+                                    <td class="px-5 py-6 text-center text-xs font-black text-slate-400">{{ ($historyInvoices->firstItem() ?? 1) + $loop->index }}</td>
                                     <td class="px-5 py-6">
                                         <p class="text-sm font-black text-slate-950">{{ $invoice['number'] }}</p>
                                         <p class="mt-1 text-xs font-black text-slate-500">Tgl: {{ date('m/d/Y', strtotime($invoice['date'])) }}</p>
@@ -142,6 +147,11 @@
                         </tbody>
                     </table>
                 </div>
+                @if ($historyInvoices->hasPages())
+                    <div class="border-t border-slate-100 px-5 py-4">
+                        {{ $historyInvoices->links() }}
+                    </div>
+                @endif
             </section>
         @endif
     </section>

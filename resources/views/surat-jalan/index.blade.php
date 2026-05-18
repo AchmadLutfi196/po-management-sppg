@@ -29,7 +29,7 @@
                     <tbody class="divide-y divide-slate-100">
                         @forelse ($orders as $order)
                             @php
-                                $sequence    = $loop->iteration;
+                                $sequence    = ($orders->firstItem() ?? 1) + $loop->index;
                                 $hasDelivery = ! empty($order['delivery']);
                                 $supplierCount = collect($order['items'])->pluck('supplier')->unique()->count();
                             @endphp
@@ -97,6 +97,11 @@
                     </tbody>
                 </table>
             </div>
+            @if ($orders->hasPages())
+                <div class="border-t border-slate-100 px-5 py-4">
+                    {{ $orders->links() }}
+                </div>
+            @endif
         </section>
     </section>
 @endsection

@@ -35,7 +35,11 @@ class DeliveryNoteController extends Controller
 
         return view('surat-jalan.index', [
             'currentUser' => $this->currentUser(),
-            'orders' => $query->latest('id')->get()->map(fn (PurchaseOrder $order): array => $this->orderToArray($order)),
+            'orders' => $query
+                ->latest('id')
+                ->paginate(10)
+                ->withQueryString()
+                ->through(fn (PurchaseOrder $order): array => $this->orderToArray($order)),
             'filters' => ['search' => $request->string('search')->toString()],
         ]);
     }

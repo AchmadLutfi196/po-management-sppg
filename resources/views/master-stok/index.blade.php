@@ -68,7 +68,7 @@
                                     <form method="POST" action="{{ route('master-stok.update', $item['id']) }}">
                                         @csrf
                                         @method('PATCH')
-                                        <td class="px-8 py-4 text-center text-sm font-black text-slate-400">{{ $loop->iteration }}</td>
+                                        <td class="px-8 py-4 text-center text-sm font-black text-slate-400">{{ ($items->firstItem() ?? 1) + $loop->index }}</td>
                                         <td class="px-8 py-4">
                                             <input name="name" value="{{ old('name', $item['name']) }}" autofocus class="h-11 w-full rounded border border-blue-300 bg-white px-4 text-sm font-semibold text-slate-800 outline-none focus:ring-4 focus:ring-blue-500/10">
                                         </td>
@@ -91,7 +91,7 @@
                                         </td>
                                     </form>
                                 @else
-                                    <td class="px-8 py-5 text-center text-sm font-black text-slate-400">{{ $loop->iteration }}</td>
+                                    <td class="px-8 py-5 text-center text-sm font-black text-slate-400">{{ ($items->firstItem() ?? 1) + $loop->index }}</td>
                                     <td class="px-8 py-5 text-base font-black text-slate-950">{{ $item['name'] }}</td>
                                     <td class="px-8 py-5">
                                         <span class="inline-flex rounded border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase text-slate-700">{{ $item['unit'] }}</span>
@@ -128,6 +128,11 @@
                     </tbody>
                 </table>
             </div>
+            @if ($items->hasPages())
+                <div class="border-t border-slate-100 px-8 py-4">
+                    {{ $items->links() }}
+                </div>
+            @endif
         </section>
     </section>
 @endsection

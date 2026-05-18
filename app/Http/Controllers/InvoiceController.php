@@ -54,11 +54,13 @@ class InvoiceController extends Controller
                     ->all();
             })
             ->values();
+        $paginatedPendingInvoices = $this->paginateCollection($pendingInvoices, $request);
+        $paginatedHistoryInvoices = $this->paginateCollection($historyInvoices, $request);
 
         return view('invoices.index', [
             'currentUser' => $this->currentUser(),
-            'pendingInvoices' => $pendingInvoices,
-            'historyInvoices' => $historyInvoices,
+            'pendingInvoices' => $paginatedPendingInvoices,
+            'historyInvoices' => $paginatedHistoryInvoices,
             'activeTab' => $request->string('tab')->toString() === 'history' ? 'history' : 'pending',
             'stats' => [
                 'total' => $historyInvoices->sum(fn (array $entry): int|float => $entry['invoice']['total_amount']),
@@ -178,7 +180,17 @@ class InvoiceController extends Controller
             'invoice_no' => ['required', 'string'],
             'status' => ['required', 'in:PAID,UNPAID'],
         ]);
-        Invoice::query()->where('purchase_order_id', $id)->where('number', $validated['invoice_no'])->update(['status' => $validated['status']]);
+        $order = $this->findOrderModel($id);
+
+        DB::transaction(function () use ($order, $validated): void {
+            Invoice::query()
+                ->where('purchase_order_id', $order->id)
+                ->where('number', $validated['invoice_no'])
+                ->update(['status' => $validated['status']]);
+
+            $hasUnpaidInvoice = $order->invoices()->where('status', 'UNPAID')->exists();
+            $order->update(['status' => $hasUnpaidInvoice ? 'INVOICED' : 'COMPLETED']);
+        });
 
         return back()->with('success', 'Status invoice berhasil diperbarui.');
     }

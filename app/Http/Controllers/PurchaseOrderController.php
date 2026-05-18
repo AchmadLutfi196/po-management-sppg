@@ -40,11 +40,15 @@ class PurchaseOrderController extends Controller
             $query->where('status', $status);
         }
 
-        $orders = $query->latest('id')->get()->map(fn (PurchaseOrder $order): array => $this->orderToArray($order));
+        $orders = $query
+            ->latest('id')
+            ->paginate(10)
+            ->withQueryString()
+            ->through(fn (PurchaseOrder $order): array => $this->orderToArray($order));
 
         return view('purchase-orders.index', [
             'currentUser' => $this->currentUser(),
-            'orders' => $orders->values(),
+            'orders' => $orders,
             'stats' => $this->poStats($this->visibleOrders()),
             'filters' => ['search' => $request->string('search')->toString(), 'status' => $status ?: 'ALL'],
         ]);

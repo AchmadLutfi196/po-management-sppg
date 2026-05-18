@@ -12,6 +12,7 @@ use App\Models\Supplier;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
@@ -136,6 +137,19 @@ trait ProcurementHelpers
         }
 
         return $createdOrders;
+    }
+
+    private function paginateCollection(Collection $items, Request $request, int $perPage = 10): LengthAwarePaginator
+    {
+        $page = LengthAwarePaginator::resolveCurrentPage();
+
+        return (new LengthAwarePaginator(
+            $items->forPage($page, $perPage)->values(),
+            $items->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url()],
+        ))->withQueryString();
     }
 
     /**

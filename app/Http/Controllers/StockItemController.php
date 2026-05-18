@@ -22,8 +22,9 @@ class StockItemController extends Controller
         $items = StockItem::query()
             ->when($request->filled('search'), fn (Builder $query): Builder => $query->whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($request->string('search')->toString()).'%']))
             ->latest('id')
-            ->get()
-            ->map(fn (StockItem $item): array => $this->stockItemToArray($item));
+            ->paginate(10)
+            ->withQueryString()
+            ->through(fn (StockItem $item): array => $this->stockItemToArray($item));
 
         return view('master-stok.index', [
             'currentUser' => $this->currentUser(),

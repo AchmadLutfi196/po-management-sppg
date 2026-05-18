@@ -86,7 +86,7 @@
                                 $firstItem       = $order['items'][0];
                                 $remaining       = max(0, count($order['items']) - 1);
                                 // Kolom NO = urutan tampil di list (1, 2, 3...)
-                                $sequence        = $loop->iteration;
+                                $sequence        = ($orders->firstItem() ?? 1) + $loop->index;
                                 // Hitung status supplier semua item
                                 $allItems        = collect($order['items']);
                                 $hasAnySupplier  = $allItems->contains(fn ($i) => $i['supplier'] !== '-' && $i['supplier'] !== null);
@@ -207,6 +207,11 @@
                     </tbody>
                 </table>
             </div>
+            @if ($orders->hasPages())
+                <div class="border-t border-slate-100 px-5 py-4">
+                    {{ $orders->links() }}
+                </div>
+            @endif
         </section>
     </section>
 @endsection
