@@ -383,7 +383,18 @@ trait ProcurementHelpers
             'bank_account_name' => $bankAccounts[0]['account_name'],
             'bank_account_number' => $bankAccounts[0]['number'],
             'bank_accounts' => $bankAccounts,
+            'managing_director_name' => $this->supplierManagingDirectorName($record),
         ];
+    }
+
+    private function supplierManagingDirectorName(?Supplier $supplier): string
+    {
+        return match ($supplier?->name) {
+            'DUNIA BUMBU MOJOKERTO' => 'Arif Rakhman Hadi',
+            'NUTRIVA FOODS' => 'Dessy Istuning Tiyas',
+            'VIALA PANGAN' => 'Dwi Silvia Anggraini',
+            default => $supplier?->bank_account_name ?? 'Arif Rakhman Hadi',
+        };
     }
 
     /**
@@ -391,19 +402,9 @@ trait ProcurementHelpers
      */
     private function supplierBankAccounts(?string $supplier): array
     {
-        return match ($supplier) {
-            'VIALA PANGAN' => [
-                ['bank' => 'BCA', 'account_name' => 'Dwi Silvia Anggraini', 'number' => '6140564859'],
-                ['bank' => 'BRI', 'account_name' => 'Dwi Silvia Anggraini', 'number' => '785601005827536'],
-                ['bank' => 'Bank JATIM', 'account_name' => 'Dwi Silvia Anggraini', 'number' => '0163203189'],
-            ],
-            'NUTRIVA FOODS' => [
-                ['bank' => 'MANDIRI', 'account_name' => 'Dessy Istuning Tiyas', 'number' => '1420026949973'],
-            ],
-            default => [
-                ['bank' => 'MANDIRI', 'account_name' => 'Arif Rakhman Hadi', 'number' => '1420015180150'],
-            ],
-        };
+        return [
+            ['bank' => 'MANDIRI', 'account_name' => 'Arif Rakhman Hadi', 'number' => '1420015180150'],
+        ];
     }
 
     private function invoiceNumberFor(?string $supplier, string $poNumber): string

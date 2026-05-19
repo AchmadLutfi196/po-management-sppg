@@ -39,6 +39,7 @@
             $total = $items->sum(fn ($item) => $item['qty'] * $item['price']);
             $theme = $supplier['theme'];
             $isPaid = $invoice['status'] === 'PAID';
+            $statusColor = $isPaid ? '#16a34a' : '#dc2626';
         @endphp
 
         <header class="print:hidden sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white px-8 py-4 shadow-sm">
@@ -63,7 +64,7 @@
                     </div>
                     <div class="text-right">
                         <p class="font-serif text-4xl font-black italic tracking-tight text-slate-950 print:text-3xl">INVOICE</p>
-                        <span class="mt-4 inline-flex rounded-full px-5 py-1.5 text-[9px] font-black uppercase tracking-wider text-white" style="background-color: {{ $isPaid ? '#10b981' : $theme }}">
+                        <span class="mt-4 inline-flex rounded-full px-5 py-1.5 text-[9px] font-black uppercase tracking-wider text-white" style="background-color: {{ $statusColor }}">
                             {{ $isPaid ? 'Lunas' : 'Belum Bayar' }}
                         </span>
                         <p class="mt-3 text-xs font-black uppercase tracking-wider text-slate-950">{{ $invoice['number'] }}</p>
@@ -165,7 +166,7 @@
                         <div class="mt-2 flex h-24 items-center justify-center print:h-16">
                             <img src="{{ asset($supplier['stamp']) }}" alt="Stamp {{ $supplier['name'] }}" class="h-24 w-24 object-contain opacity-80 print:h-16 print:w-16">
                         </div>
-                        <div class="mt-2 w-full border-t border-slate-950 pt-2 text-[10px] font-black">{{ $supplier['bank_account_name'] }}</div>
+                        <div class="mt-2 w-full border-t border-slate-950 pt-2 text-[10px] font-black">{{ $supplier['managing_director_name'] }}</div>
                     </div>
                 </section>
 

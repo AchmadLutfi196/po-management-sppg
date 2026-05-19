@@ -82,14 +82,14 @@
 
         <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
             <div class="overflow-x-auto">
-                <table class="w-full min-w-[900px] text-sm">
+                <table class="w-full min-w-[960px] text-sm">
                     <thead class="bg-slate-50/80">
                         <tr>
                             <th class="w-10 px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">#</th>
                             <th class="px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Barang</th>
                             <th class="w-40 px-2 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Catatan</th>
                             <th class="w-16 px-2 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Grade</th>
-                            <th class="w-16 px-2 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Qty</th>
+                            <th class="w-24 px-2 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Qty</th>
                             <th class="w-16 px-2 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Satuan</th>
                             <th class="w-28 px-2 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Harga</th>
                             @if (($currentUser['role'] ?? '') !== 'SPPG')
@@ -125,7 +125,7 @@
                                         <option value="REJECT" @selected(old("items.$itemIndex.grade", $item['grade'] ?? '') === 'REJECT')>REJ</option>
                                     </select>
                                 </td>
-                                <td class="px-2 py-2"><input name="items[{{ $itemIndex }}][qty]" type="number" min="0.01" step="0.01" value="{{ old("items.$itemIndex.qty", $item['qty'] ?? 0) }}" class="w-full rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs font-semibold text-slate-800 outline-none"></td>
+                                <td class="px-2 py-2"><input name="items[{{ $itemIndex }}][qty]" type="number" min="0.01" step="0.01" value="{{ old("items.$itemIndex.qty", $item['qty'] ?? 0) }}" class="w-full min-w-[88px] rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-800 outline-none"></td>
                                 <td class="px-2 py-2"><input name="items[{{ $itemIndex }}][unit]" value="{{ old("items.$itemIndex.unit", strtoupper($item['unit'] ?? 'KG')) }}" class="w-full rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs font-semibold text-slate-800 outline-none"></td>
                                 <td class="px-2 py-2">
                                     <div class="flex items-center rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5">
@@ -225,7 +225,7 @@
                         <option value="REJECT">REJ</option>
                     </select>
                 </td>
-                <td class="px-2 py-2"><input name="items[${idx}][qty]" type="number" min="0.01" step="0.01" value="0" class="w-full rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs font-semibold text-slate-800 outline-none"></td>
+                <td class="px-2 py-2"><input name="items[${idx}][qty]" type="number" min="0.01" step="0.01" value="0" class="w-full min-w-[88px] rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-800 outline-none"></td>
                 <td class="px-2 py-2"><input name="items[${idx}][unit]" value="KG" class="w-full rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs font-semibold text-slate-800 outline-none"></td>
                 <td class="px-2 py-2">
                     <div class="flex items-center rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5">

@@ -95,11 +95,11 @@ test('invoice create shows supplier bank accounts', function (string $supplierNa
 })->with([
     'viala pangan' => [
         'VIALA PANGAN',
-        ['AN. Dwi Silvia Anggraini', 'BCA: 6140564859', 'BRI: 785601005827536', 'Bank JATIM: 0163203189'],
+        ['AN. Arif Rakhman Hadi', 'MANDIRI: 1420015180150'],
     ],
     'nutriva foods' => [
         'NUTRIVA FOODS',
-        ['AN. Dessy Istuning Tiyas', 'MANDIRI: 1420026949973'],
+        ['AN. Arif Rakhman Hadi', 'MANDIRI: 1420015180150'],
     ],
     'dunia bumbu mojokerto' => [
         'DUNIA BUMBU MOJOKERTO',
@@ -107,14 +107,37 @@ test('invoice create shows supplier bank accounts', function (string $supplierNa
     ],
 ]);
 
-test('invoice preview signature uses supplier account holder name', function (): void {
+test('invoice preview uses global bank account and supplier managing director', function (): void {
     $order = invoiceBankInfoOrder('VIALA PANGAN');
 
     $this->get(route('invoices.preview', ['id' => $order->id, 'supplier' => 'VIALA PANGAN']))
         ->assertOk()
+        ->assertSeeText('AN. Arif Rakhman Hadi')
         ->assertSeeText('Dwi Silvia Anggraini')
-        ->assertDontSeeText('ARIF RAKHMAN HADI');
+        ->assertSeeText('MANDIRI')
+        ->assertSeeText('1420015180150');
 });
+
+test('dunia bumbu invoice preview uses arif as managing director', function (): void {
+    $order = invoiceBankInfoOrder('DUNIA BUMBU MOJOKERTO');
+
+    $this->get(route('invoices.preview', ['id' => $order->id, 'supplier' => 'DUNIA BUMBU MOJOKERTO']))
+        ->assertOk()
+        ->assertSeeText('Arif Rakhman Hadi')
+        ->assertDontSee('>Dunia Bumbu</div>', false);
+});
+
+test('invoice preview status badge colors follow payment status', function (string $status, string $label, string $color): void {
+    [$order, $invoice] = invoiceStatusFixture($status);
+
+    $this->get(route('invoices.preview', ['id' => $order->id, 'invoice' => $invoice->number, 'supplier' => $invoice->supplier_name]))
+        ->assertOk()
+        ->assertSeeText($label)
+        ->assertSee("background-color: {$color}", false);
+})->with([
+    'unpaid is red' => ['UNPAID', 'Belum Bayar', '#dc2626'],
+    'paid is green' => ['PAID', 'Lunas', '#16a34a'],
+]);
 
 /**
  * @return array{PurchaseOrder, Invoice}
