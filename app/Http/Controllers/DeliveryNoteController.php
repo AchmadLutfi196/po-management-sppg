@@ -234,6 +234,6 @@ class DeliveryNoteController extends Controller
             ->filter(fn (?string $supplier): bool => filled($supplier) && $supplier !== '-')
             ->first();
 
-        return $this->supplierDetails($supplierName)['bank_account_name'];
+        return $this->supplierDetails($supplierName)['managing_director_name'];
     }
 }
