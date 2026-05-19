@@ -12,7 +12,7 @@
         <section class="mx-auto max-w-[1150px] overflow-hidden rounded-2xl bg-slate-100 shadow-2xl sm:rounded-3xl">
             <header class="flex flex-col gap-4 border-b border-slate-200 bg-white px-4 py-4 sm:px-9 lg:flex-row lg:items-center lg:justify-between">
                 <div class="flex min-w-0 items-start gap-3 sm:gap-4">
-                    <span class="mt-1 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-lg font-black text-white">P</span>
+                    @include('partials.app-logo', ['class' => 'mt-1 h-12 w-12'])
                     <div class="min-w-0">
                         <h1 class="break-words text-lg font-black tracking-tight text-slate-950 sm:text-2xl">Detail Pesanan: {{ $order['number'] ?? 'Belum Diterbitkan' }}</h1>
                         <div class="mt-2">@include('partials.status-badge', ['status' => $order['status']])</div>
@@ -131,6 +131,9 @@
                         </table>
                     </div>
                 </section>
+                <div class="text-center text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
+                    @include('partials.copyright')
+                </div>
                 @if ($currentUser['role'] === 'ADMIN' && ! $isLocked && ! $order['number'])
                     <div class="sticky bottom-0 -mx-3 -mb-4 flex flex-col gap-2 border-t border-amber-200 bg-amber-50 px-3 py-3 text-xs font-black uppercase tracking-[0.12em] text-amber-700 sm:-mx-6 sm:-mb-5 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:tracking-[0.14em]">
                         <span>⚠ Tentukan supplier untuk semua item agar nomor PO diterbitkan dan status berubah ke PROCESSING.</span>

@@ -6,7 +6,7 @@
             @csrf
             <header class="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
                 <div class="flex min-w-0 items-center gap-3">
-                    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm font-black text-white">P</span>
+                    @include('partials.app-logo', ['class' => 'h-9 w-9'])
                     <h1 class="min-w-0 text-base font-black tracking-tight text-slate-950 sm:text-lg">Input PO Baru</h1>
                 </div>
                 <div class="flex items-center gap-4">
@@ -17,8 +17,9 @@
 
             @include('purchase-orders.partials.form-fields')
 
-            <footer class="flex items-center justify-between border-t border-slate-200 bg-white px-4 py-2.5 text-[10px] font-bold uppercase tracking-wide text-slate-400 sm:px-6">
+            <footer class="flex flex-col items-center justify-between gap-1 border-t border-slate-200 bg-white px-4 py-2.5 text-center text-[10px] font-bold uppercase tracking-wide text-slate-400 sm:flex-row sm:px-6">
                 <span>Operator: {{ $currentUser['name'] }} / {{ now()->format('Y-m-d') }}</span>
+                @include('partials.copyright')
                 <span>Items: <span id="footer-items-count">2</span></span>
             </footer>
         </form>

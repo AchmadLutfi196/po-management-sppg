@@ -1,7 +1,7 @@
 <div class="p-5 sm:p-6">
     <a href="{{ route('dashboard') }}" class="mb-7 flex items-center gap-2">
-        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm font-black text-white">P</span>
-        <span class="text-xl font-black tracking-tight text-slate-900">ProcureX</span>
+        @include('partials.app-logo', ['class' => 'h-10 w-10'])
+        <span class="text-lg font-black tracking-tight text-slate-900">Procurement SPPG</span>
     </a>
 
     <nav class="space-y-1">

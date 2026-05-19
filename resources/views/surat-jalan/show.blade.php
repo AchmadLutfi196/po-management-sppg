@@ -220,8 +220,9 @@
                 </section>
             </div>
 
-            <footer class="flex items-center justify-between border-t border-slate-200 bg-white px-4 py-3 sm:px-6">
+            <footer class="flex flex-col items-center justify-between gap-2 border-t border-slate-200 bg-white px-4 py-3 sm:flex-row sm:px-6">
                 <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Pastikan data sudah benar sebelum disimpan.</p>
+                <p class="text-center text-[10px] font-bold uppercase tracking-wide text-slate-400">@include('partials.copyright')</p>
                 <div class="flex items-center gap-4">
                     <a href="{{ route('surat-jalan.index') }}" class="text-sm font-bold text-slate-500 hover:text-slate-700">Batal</a>
                     @if ($isAdmin)

@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ $title ?? 'PO Management SPPG' }}</title>
+        <link rel="icon" href="{{ asset('logo-procurement.jpeg') }}">
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
             window.AppAlerts = {
@@ -26,8 +27,9 @@
                     </div>
                 </main>
 
-                <footer class="hidden h-10 items-center justify-between border-t border-slate-200 bg-slate-50 px-8 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500 md:flex">
+                <footer class="flex min-h-10 flex-col items-center justify-center gap-1 border-t border-slate-200 bg-slate-50 px-4 py-2 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 md:flex-row md:justify-between md:px-8">
                     <span>Operator: {{ $currentUser['name'] }} / {{ now()->format('Y-m-d') }}</span>
+                    @include('partials.copyright')
                     <span>Versi: 2.1.0-STABLE</span>
                 </footer>
             </div>

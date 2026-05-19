@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Surat Jalan - {{ $order['delivery']['number'] ?? $order['number'] }}</title>
+        <link rel="icon" href="{{ asset('logo-procurement.jpeg') }}">
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <style>
             @page {

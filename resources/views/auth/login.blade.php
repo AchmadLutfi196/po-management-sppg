@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Login - PO Management SPPG</title>
+        <link rel="icon" href="{{ asset('logo-procurement.jpeg') }}">
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="min-h-screen bg-slate-100 font-sans text-slate-800 antialiased">
@@ -13,8 +14,8 @@
             <section class="w-full max-w-md overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl shadow-slate-300/60">
                 <div class="p-8 sm:p-10">
                     <div class="mb-9 flex items-center justify-center gap-3">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-2xl font-black text-white shadow-xl shadow-blue-500/20">P</div>
-                        <span class="text-3xl font-black italic tracking-tighter text-slate-900">ProcureX</span>
+                        @include('partials.app-logo', ['class' => 'h-16 w-16 rounded-2xl shadow-xl shadow-blue-500/20'])
+                        <span class="text-2xl font-black tracking-tight text-slate-900">Procurement SPPG</span>
                     </div>
 
                     <div class="mb-8 text-center">
@@ -75,7 +76,7 @@
                 </div>
 
                 <div class="border-t border-slate-100 bg-slate-50 p-6 text-center text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
-                    SecID: #882-SYS / Ver: 2.1.0
+                    @include('partials.copyright')
                 </div>
             </section>
         </main>

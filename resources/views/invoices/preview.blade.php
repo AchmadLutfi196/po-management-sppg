@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Invoice Preview - {{ $invoice['number'] }}</title>
+        <link rel="icon" href="{{ asset('logo-procurement.jpeg') }}">
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <style>
             @page {
