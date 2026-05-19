@@ -141,27 +141,30 @@
                     </div>
                 </section>
 
-                <!-- Payment Info -->
-                <section class="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-6 w-full print:mt-3 print:p-4">
-                    <h3 class="text-xs font-black text-slate-900">Payment Information</h3>
-                    <div class="mt-3 grid grid-cols-1 md:grid-cols-2 print-grid-2 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                        <div class="border-b md:border-b-0 md:border-r border-slate-200 p-4 print:p-3">
-                            <p class="text-[8px] font-black uppercase tracking-[0.18em] text-slate-400">Account Holder</p>
-                            <p class="mt-1 text-xs font-black">ARIF RAKHMAN HADI</p>
-                        </div>
-                        <div class="p-4 print:p-3">
-                            <p class="text-[8px] font-black uppercase tracking-[0.18em] text-slate-400">Mandiri</p>
-                            <p class="mt-1 text-sm font-black tracking-wider" style="color: {{ $theme }}">1420015180150</p>
+                <!-- Payment Info & Signature -->
+                <section class="mt-8 space-y-8 print:mt-3 print:space-y-5">
+                    <div class="rounded-xl border border-slate-200 bg-slate-50 p-5 print:p-3">
+                        <h3 class="text-xs font-black text-slate-900">Payment Information</h3>
+                        <div class="mt-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm print:p-3">
+                            <p class="text-[8px] font-black uppercase tracking-[0.18em] text-slate-400">Transfer Bank</p>
+                            <p class="mt-1 text-xs font-black text-slate-950">AN. {{ $supplier['bank_account_name'] }}</p>
+                            <div class="mt-3 grid gap-2">
+                                @foreach ($supplier['bank_accounts'] as $account)
+                                    <div class="flex items-center justify-between gap-4 rounded-md bg-slate-50 px-3 py-2">
+                                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-500">{{ $account['bank'] }}</span>
+                                        <span class="text-xs font-black tracking-wider" style="color: {{ $theme }}">{{ $account['number'] }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                     </div>
-                </section>
 
-                <!-- Signature & Footer -->
-                <section class="mt-10 flex justify-end print:mt-3">
-                    <div class="relative w-64 text-center">
-                        <p class="mb-14 text-xs italic text-slate-500 print:mb-6">Managing Director</p>
-                        <img src="{{ asset($supplier['stamp']) }}" alt="Stamp {{ $supplier['name'] }}" class="absolute left-1/2 top-4 h-28 w-28 -translate-x-1/2 object-contain opacity-80 print:-top-2 print:h-16 print:w-16">
-                        <div class="border-t border-slate-950 pt-2 text-[10px] font-black">ARIF RAKHMAN HADI</div>
+                    <div class="ml-auto flex w-72 flex-col items-center justify-end text-center print:w-64">
+                        <p class="text-xs italic text-slate-500">Managing Director</p>
+                        <div class="mt-2 flex h-24 items-center justify-center print:h-16">
+                            <img src="{{ asset($supplier['stamp']) }}" alt="Stamp {{ $supplier['name'] }}" class="h-24 w-24 object-contain opacity-80 print:h-16 print:w-16">
+                        </div>
+                        <div class="mt-2 w-full border-t border-slate-950 pt-2 text-[10px] font-black">{{ $supplier['bank_account_name'] }}</div>
                     </div>
                 </section>
 

@@ -103,8 +103,13 @@
 
                         <div class="rounded-2xl border border-blue-100 bg-blue-50 p-5">
                             <p class="text-xs font-black uppercase tracking-[0.18em] text-blue-600">Informasi Rekening</p>
-                            <p class="mt-5 text-xs font-black uppercase text-blue-600">Mandiri: 1420015180150</p>
-                            <p class="mt-1 text-xs font-black uppercase text-blue-600">a.n Arif Rakhman Hadi</p>
+                            <p class="mt-4 text-xs font-black uppercase text-blue-600">Transfer Bank</p>
+                            <p class="mt-1 text-xs font-black uppercase text-blue-600">AN. {{ $supplier['bank_account_name'] }}</p>
+                            <div class="mt-3 space-y-1.5">
+                                @foreach ($supplier['bank_accounts'] as $account)
+                                    <p class="text-xs font-black uppercase text-blue-600">{{ $account['bank'] }}: {{ $account['number'] }}</p>
+                                @endforeach
+                            </div>
                         </div>
 
                         @if ($errors->any())

@@ -370,6 +370,7 @@ trait ProcurementHelpers
     private function supplierDetails(?string $supplier): array
     {
         $record = Supplier::query()->where('name', $supplier)->first() ?? Supplier::query()->first();
+        $bankAccounts = $this->supplierBankAccounts($record?->name);
 
         return [
             'name' => $record?->name ?? 'SUPPLIER',
@@ -377,10 +378,31 @@ trait ProcurementHelpers
             'logo' => $record?->logo_path ?? 'logo-duniabumbu.jpeg',
             'stamp' => $record?->stamp_path ?? 'stamp-duniabumbu.jpeg',
             'theme' => $record?->theme_color ?? '#2563eb',
-            'bank_name' => $record?->bank_name ?? 'Mandiri',
-            'bank_account_name' => $record?->bank_account_name ?? 'ARIF RAKHMAN HADI',
-            'bank_account_number' => $record?->bank_account_number ?? '1420015180150',
+            'bank_name' => $bankAccounts[0]['bank'],
+            'bank_account_name' => $bankAccounts[0]['account_name'],
+            'bank_account_number' => $bankAccounts[0]['number'],
+            'bank_accounts' => $bankAccounts,
         ];
+    }
+
+    /**
+     * @return array<int, array{bank: string, account_name: string, number: string}>
+     */
+    private function supplierBankAccounts(?string $supplier): array
+    {
+        return match ($supplier) {
+            'VIALA PANGAN' => [
+                ['bank' => 'BCA', 'account_name' => 'Dwi Silvia Anggraini', 'number' => '6140564859'],
+                ['bank' => 'BRI', 'account_name' => 'Dwi Silvia Anggraini', 'number' => '785601005827536'],
+                ['bank' => 'Bank JATIM', 'account_name' => 'Dwi Silvia Anggraini', 'number' => '0163203189'],
+            ],
+            'NUTRIVA FOODS' => [
+                ['bank' => 'MANDIRI', 'account_name' => 'Dessy Istuning Tiyas', 'number' => '1420026949973'],
+            ],
+            default => [
+                ['bank' => 'MANDIRI', 'account_name' => 'Arif Rakhman Hadi', 'number' => '1420015180150'],
+            ],
+        };
     }
 
     private function invoiceNumberFor(?string $supplier, string $poNumber): string

@@ -83,6 +83,39 @@ test('invoice history shows item details', function (): void {
         ->assertSeeText('Rp 180.000');
 });
 
+test('invoice create shows supplier bank accounts', function (string $supplierName, array $expectedTexts): void {
+    $order = invoiceBankInfoOrder($supplierName);
+
+    $response = $this->get(route('invoices.create', ['id' => $order->id, 'supplier' => $supplierName]))
+        ->assertOk();
+
+    foreach ($expectedTexts as $expectedText) {
+        $response->assertSeeText($expectedText);
+    }
+})->with([
+    'viala pangan' => [
+        'VIALA PANGAN',
+        ['AN. Dwi Silvia Anggraini', 'BCA: 6140564859', 'BRI: 785601005827536', 'Bank JATIM: 0163203189'],
+    ],
+    'nutriva foods' => [
+        'NUTRIVA FOODS',
+        ['AN. Dessy Istuning Tiyas', 'MANDIRI: 1420026949973'],
+    ],
+    'dunia bumbu mojokerto' => [
+        'DUNIA BUMBU MOJOKERTO',
+        ['AN. Arif Rakhman Hadi', 'MANDIRI: 1420015180150'],
+    ],
+]);
+
+test('invoice preview signature uses supplier account holder name', function (): void {
+    $order = invoiceBankInfoOrder('VIALA PANGAN');
+
+    $this->get(route('invoices.preview', ['id' => $order->id, 'supplier' => 'VIALA PANGAN']))
+        ->assertOk()
+        ->assertSeeText('Dwi Silvia Anggraini')
+        ->assertDontSeeText('ARIF RAKHMAN HADI');
+});
+
 /**
  * @return array{PurchaseOrder, Invoice}
  */
@@ -114,4 +147,33 @@ function invoiceStatusFixture(string $invoiceStatus): array
     ]);
 
     return [$order, $invoice];
+}
+
+function invoiceBankInfoOrder(string $supplierName): PurchaseOrder
+{
+    $sppg = Sppg::query()->create([
+        'code' => 'M'.$supplierName,
+        'name' => 'SPPG Balongsari',
+    ]);
+
+    $supplier = Supplier::query()->create(['name' => $supplierName]);
+
+    $order = PurchaseOrder::query()->create([
+        'number' => '12/PO/18052026/VP/2026',
+        'date' => '2026-05-18',
+        'created_by' => 'Admin Supplier',
+        'sppg_id' => $sppg->id,
+        'status' => 'INVOICED',
+    ]);
+
+    $order->items()->create([
+        'supplier_id' => $supplier->id,
+        'name' => 'BAWANG MERAH',
+        'qty' => 12,
+        'unit' => 'KG',
+        'grade' => 'A',
+        'price' => 15000,
+    ]);
+
+    return $order;
 }

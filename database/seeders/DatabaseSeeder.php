@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
             ['code' => 'M1101'],
             [
                 'name' => 'SPPG-Balongsari',
-                'location' => 'Surabaya',
+                'location' => 'Mojokerto',
                 'pic_name' => 'Datok',
                 'whatsapp' => '0894334444',
             ],
