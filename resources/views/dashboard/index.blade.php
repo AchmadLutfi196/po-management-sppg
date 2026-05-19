@@ -138,7 +138,7 @@
             <aside class="rounded-2xl border border-slate-200 bg-white p-5 shadow-md shadow-slate-200/70 sm:rounded-3xl sm:p-6 xl:col-span-4">
                 <h3 class="mb-6 text-sm font-black uppercase tracking-[0.18em] text-slate-950">Aktivitas Terakhir</h3>
                 <div class="space-y-5">
-                    @foreach ($orders->take(6) as $order)
+                    @foreach ($orders->take(4) as $order)
                         @php
                             $baseNumber = is_string($order['number'] ?? null) ? (int) strtok($order['number'], '/') : 0;
                             $tone       = $baseNumber > 0
