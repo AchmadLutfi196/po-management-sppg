@@ -29,6 +29,7 @@ Route::get('/purchase-orders/{id}/edit', [PurchaseOrderController::class, 'edit'
 
 Route::get('/surat-jalan', [DeliveryNoteController::class, 'index'])->name('surat-jalan.index');
 Route::patch('/surat-jalan/{id}', [DeliveryNoteController::class, 'update'])->name('surat-jalan.update');
+Route::patch('/surat-jalan/{id}/preview', [DeliveryNoteController::class, 'previewFromForm'])->name('surat-jalan.preview.form');
 Route::get('/surat-jalan/{id}/preview', [DeliveryNoteController::class, 'preview'])->name('surat-jalan.preview');
 Route::get('/surat-jalan/{id}', [DeliveryNoteController::class, 'show'])->name('surat-jalan.show');
 

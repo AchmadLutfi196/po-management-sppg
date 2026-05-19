@@ -264,11 +264,13 @@ trait ProcurementHelpers
             'sppg' => $order->sppg->name,
             'sppg_code' => $order->sppg->code,
             'sppg_location' => $order->sppg->location,
+            'sppg_pic_name' => $order->sppg->pic_name,
             'sppg_whatsapp' => $order->sppg->whatsapp,
             'droping_date' => $order->droping_date?->format('Y-m-d'),
             'droping_time' => $order->droping_time ? substr((string) $order->droping_time, 0, 5) : null,
             'status' => $order->status,
             'items' => $order->items->map(fn (PurchaseOrderItem $item): array => $this->itemToArray($item))->values()->all(),
+            'delivery_suggested_number' => $this->deliveryNoteNumberForPurchaseOrder($order->number),
             'delivery' => $order->deliveryNote ? $this->deliveryToArray($order->deliveryNote) : null,
             'invoices' => $order->invoices->map(fn (Invoice $invoice): array => $this->invoiceToArray($invoice))->values()->all(),
         ];
@@ -390,6 +392,15 @@ trait ProcurementHelpers
         };
 
         return 'INV/'.$prefix.'/'.substr(preg_replace('/\D+/', '', $poNumber), -6).random_int(10, 99);
+    }
+
+    private function deliveryNoteNumberForPurchaseOrder(?string $poNumber): string
+    {
+        if (is_string($poNumber) && str_contains($poNumber, '/PO/')) {
+            return str_replace('/PO/', '/SJ/', $poNumber);
+        }
+
+        return 'SJ/'.now()->format('YmdHis');
     }
 
     private function nextPurchaseOrderNumber(string $prefix): string

@@ -64,7 +64,7 @@
             <div class="relative w-full lg:w-52">
                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">▽</span>
                 <select name="status" class="w-full appearance-none rounded-lg border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-xs font-black uppercase tracking-wider text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" onchange="this.form.submit()">
-                    @foreach (['ALL' => 'Semua Status', 'VALID' => 'Valid', 'PROCESSING' => 'Proses', 'COMPLETED' => 'Selesai', 'INVOICED' => 'Tertagih (Inv)', 'CANCELLED' => 'Dibatalkan'] as $value => $label)
+                    @foreach (['ALL' => 'Semua Status', 'VALID' => 'Valid', 'PROCESSING' => 'Proses', 'INVOICED' => 'Tertagih', 'COMPLETED' => 'Selesai', 'CANCELLED' => 'Dibatalkan'] as $value => $label)
                         <option value="{{ $value }}" @selected(($filters['status'] ?? 'ALL') === $value)>{{ $label }}</option>
                     @endforeach
                 </select>
@@ -167,7 +167,7 @@
                                             @csrf
                                             @method('PATCH')
                                             <select name="status" onchange="this.form.submit()" class="{{ $statusSelectClass }} min-w-36 rounded-full border px-3 py-2 text-[10px] font-black uppercase tracking-wider outline-none transition focus:ring-4">
-                                                @foreach (['VALID' => 'VALID', 'PROCESSING' => 'PROSES', 'COMPLETED' => 'SELESAI', 'INVOICED' => 'TERTAGIH (INV)', 'CANCELLED' => 'DIBATALKAN'] as $value => $label)
+                                                @foreach (['VALID' => 'VALID', 'PROCESSING' => 'PROSES', 'INVOICED' => 'TERTAGIH', 'COMPLETED' => 'SELESAI', 'CANCELLED' => 'DIBATALKAN'] as $value => $label)
                                                     <option value="{{ $value }}" @selected($order['status'] === $value)>{{ $label }}</option>
                                                 @endforeach
                                             </select>

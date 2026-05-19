@@ -75,6 +75,7 @@ class DeliveryNoteController extends Controller
 
         $this->authorizeAdmin();
         $order = $this->findOrderModel($id);
+        $existingDeliveryNote = $order->deliveryNote;
         $validated = $request->validate([
             'kepada' => ['required', 'string', 'max:120'],
             'kd_sppg' => ['nullable', 'string', 'max:40'],
@@ -83,8 +84,8 @@ class DeliveryNoteController extends Controller
             'whatsapp' => ['nullable', 'string', 'max:40'],
             'surat_jalan_no' => ['required', 'string', 'max:80'],
             'delivery_date' => ['required', 'date'],
-            'driver' => ['nullable', 'string', 'max:120'],
-            'notes' => ['nullable', 'string', 'max:500'],
+            'driver' => ['required', 'string', 'max:120'],
+            'notes' => ['required', 'string', 'max:500'],
             'qty_actual' => ['required', 'array'],
             'qty_actual.*' => ['required', 'numeric', 'min:0'],
             'prices' => ['required', 'array'],
@@ -93,7 +94,7 @@ class DeliveryNoteController extends Controller
             'suppliers.*' => ['required', 'exists:suppliers,name'],
             'item_photos' => ['nullable', 'array'],
             'item_photos.*' => ['nullable', 'image', 'max:5120'],
-            'proof_photo' => ['nullable', 'image', 'max:10240'],
+            'proof_photo' => [$existingDeliveryNote?->proof_photo ? 'nullable' : 'required', 'image', 'max:10240'],
         ]);
 
         // Proses upload foto per item
@@ -145,7 +146,7 @@ class DeliveryNoteController extends Controller
                 ]);
             }
 
-            $order->update(['status' => 'COMPLETED']);
+            $order->update(['status' => 'INVOICED']);
         });
 
         return redirect()->route('surat-jalan.show', $order->id)->with('success', 'Surat Jalan berhasil disimpan.');
@@ -160,6 +161,58 @@ class DeliveryNoteController extends Controller
         return view('surat-jalan.preview', [
             'currentUser' => $this->currentUser(),
             'order' => $this->findOrderArray($id),
+        ]);
+    }
+
+    public function previewFromForm(Request $request, string $id): View|RedirectResponse
+    {
+        if ($redirect = $this->requireAuth()) {
+            return $redirect;
+        }
+
+        $validated = $request->validate([
+            'kepada' => ['required', 'string', 'max:120'],
+            'kd_sppg' => ['nullable', 'string', 'max:40'],
+            'nama_sppg' => ['required', 'string', 'max:120'],
+            'pj_sppg' => ['nullable', 'string', 'max:120'],
+            'whatsapp' => ['nullable', 'string', 'max:40'],
+            'surat_jalan_no' => ['required', 'string', 'max:80'],
+            'delivery_date' => ['required', 'date'],
+            'driver' => ['nullable', 'string', 'max:120'],
+            'notes' => ['nullable', 'string', 'max:500'],
+            'qty_actual' => ['required', 'array'],
+            'qty_actual.*' => ['required', 'numeric', 'min:0'],
+            'prices' => ['required', 'array'],
+            'prices.*' => ['required', 'numeric', 'min:0'],
+            'suppliers' => ['required', 'array'],
+            'suppliers.*' => ['required', 'exists:suppliers,name'],
+        ]);
+
+        $order = $this->findOrderArray($id);
+        $order['delivery'] = [
+            'number' => $validated['surat_jalan_no'],
+            'date' => $validated['delivery_date'],
+            'driver' => $validated['driver'] ?: 'Nama Pengirim',
+            'notes' => $validated['notes'] ?: '-',
+            'kepada' => $validated['kepada'],
+            'kd_sppg' => $validated['kd_sppg'] ?: $order['sppg_code'],
+            'nama_sppg' => $validated['nama_sppg'],
+            'pj_sppg' => $validated['pj_sppg'] ?: '-',
+            'whatsapp' => $validated['whatsapp'] ?: '-',
+            'has_photo' => false,
+            'proof_photo' => null,
+            'item_photos' => [],
+        ];
+
+        foreach ($order['items'] as $index => $item) {
+            $order['items'][$index]['qty'] = (float) ($validated['qty_actual'][$index] ?? $item['qty']);
+            $order['items'][$index]['price'] = $validated['prices'][$index] ?? $item['price'];
+            $order['items'][$index]['supplier'] = $validated['suppliers'][$index] ?? $item['supplier'];
+        }
+
+        return view('surat-jalan.preview', [
+            'currentUser' => $this->currentUser(),
+            'order' => $order,
         ]);
     }
 }

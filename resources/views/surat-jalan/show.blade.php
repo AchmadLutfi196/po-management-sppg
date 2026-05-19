@@ -6,7 +6,7 @@
         $hasDelivery = ! empty($order['delivery']);
 
         $firstSupplier = collect($order['items'])->pluck('supplier')->filter(fn ($s) => $s !== '-')->first() ?? '-';
-        $sjNumber      = $delivery['number'] ?? 'SJ/'.now()->format('Y').'/'.random_int(100, 999);
+        $sjNumber      = $delivery['number'] ?? $order['delivery_suggested_number'];
 
         // Prioritas: data delivery yg sudah tersimpan → data SPPG dari database → fallback
         $kepada       = $delivery['kepada']    ?? $sppg['name'];          // ← nama SPPG, bukan location
@@ -39,7 +39,7 @@
                     <h1 class="text-2xl font-black tracking-tight text-slate-950">{{ $title }}</h1>
                 </div>
                 <div class="flex items-center gap-4">
-                    <a href="{{ route('surat-jalan.preview', $order['id']) }}" class="rounded-lg border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-black text-slate-600">Cetak PDF</a>
+                    <button type="submit" formaction="{{ route('surat-jalan.preview.form', $order['id']) }}" formtarget="_blank" class="rounded-lg border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-black text-slate-600">Cetak PDF</button>
                     <a href="{{ route('surat-jalan.index') }}" class="text-3xl leading-none text-slate-400 hover:text-slate-700">×</a>
                 </div>
             </header>
@@ -137,7 +137,7 @@
                             </span>
                             <div>
                                 <p class="text-lg font-black uppercase">Siap Kirim</p>
-                                <p class="text-xs font-black text-emerald-100">Status PO akan berubah menjadi dikirim otomatis.</p>
+                                <p class="text-xs font-black text-emerald-100">Status PO akan berubah menjadi tertagih otomatis.</p>
                             </div>
                         </div>
                     </div>
@@ -215,7 +215,7 @@
                 <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Pastikan data barang sudah benar sebelum disimpan.</p>
                 <div class="flex items-center gap-6">
                     <a href="{{ route('surat-jalan.index') }}" class="text-sm font-black text-slate-700">Batal</a>
-                    <button type="submit" class="rounded-lg bg-blue-600 px-9 py-3 text-sm font-black text-white shadow-lg shadow-blue-600/20">Simpan & Update Status Pengiriman</button>
+                    <button type="submit" class="rounded-lg bg-blue-600 px-9 py-3 text-sm font-black text-white shadow-lg shadow-blue-600/20">Simpan & Terbitkan Surat Jalan</button>
                 </div>
             </footer>
         </form>
