@@ -19,9 +19,20 @@ class DashboardController extends Controller
         }
 
         $orders = $this->visibleOrders();
-        $invoicePaid = Invoice::query()->where('status', 'PAID')->sum('total_amount');
-        $invoiceUnpaid = Invoice::query()->where('status', 'UNPAID')->sum('total_amount');
-        $estimatedUnbilled = PurchaseOrderItem::query()->where('is_invoiced', false)->get()->sum(fn (PurchaseOrderItem $item): float|int => $item->qty * $item->price);
+        $visibleOrderIds = $this->visibleOrdersQuery()->pluck('id');
+        $invoicePaid = Invoice::query()
+            ->whereIn('purchase_order_id', $visibleOrderIds)
+            ->where('status', 'PAID')
+            ->sum('total_amount');
+        $invoiceUnpaid = Invoice::query()
+            ->whereIn('purchase_order_id', $visibleOrderIds)
+            ->where('status', 'UNPAID')
+            ->sum('total_amount');
+        $estimatedUnbilled = PurchaseOrderItem::query()
+            ->whereIn('purchase_order_id', $visibleOrderIds)
+            ->where('is_invoiced', false)
+            ->get()
+            ->sum(fn (PurchaseOrderItem $item): float|int => $item->qty * $item->price);
 
         return view('dashboard.index', [
             'currentUser' => $this->currentUser(),

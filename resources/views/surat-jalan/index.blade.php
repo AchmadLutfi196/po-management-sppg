@@ -1,16 +1,82 @@
 @extends('layouts.app', ['title' => 'Surat Jalan (Delivery)'])
 
 @section('content')
+    <style>
+        .surat-jalan-filter-grid {
+            display: grid;
+            grid-template-columns: minmax(160px, 1fr) minmax(170px, 1fr) 120px 130px 130px 105px 90px;
+            gap: 0.5rem;
+            align-items: end;
+        }
+
+        @media (max-width: 1180px) {
+            .surat-jalan-filter-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 640px) {
+            .surat-jalan-filter-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+    </style>
+
     <section class="mx-auto max-w-[1440px] space-y-4">
-        {{-- Header + Search --}}
-        <form method="GET" class="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h2 class="text-lg font-black tracking-tight text-slate-950">Manajemen Surat Jalan</h2>
-                <p class="mt-0.5 text-xs font-medium text-slate-500">Kelola pengiriman barang dan bukti drop barang.</p>
-            </div>
-            <div class="relative w-full sm:w-80">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-base text-slate-400">⌕</span>
-                <input name="search" value="{{ $filters['search'] ?? '' }}" type="search" placeholder="Cari No PO / No SJ..." class="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm font-semibold text-slate-600 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10">
+        {{-- Header + Filter --}}
+        <form method="GET" class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div class="space-y-3">
+                <div>
+                    <h2 class="text-lg font-black tracking-tight text-slate-950">Manajemen Surat Jalan</h2>
+                    <p class="mt-0.5 text-xs font-medium text-slate-500">Kelola pengiriman barang dan bukti drop barang.</p>
+                </div>
+
+                <div class="surat-jalan-filter-grid">
+                    <div>
+                        <label class="space-y-1">
+                            <span class="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">Cari</span>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400">Cari</span>
+                                <input name="search" value="{{ $filters['search'] ?? '' }}" type="search" placeholder="No PO / No SJ..." class="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-12 pr-3 text-sm font-semibold text-slate-600 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10">
+                            </div>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="space-y-1">
+                            <span class="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">SPPG</span>
+                            <select name="sppg" class="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-bold text-slate-600 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10">
+                                <option value="">Semua SPPG</option>
+                                @foreach ($sppgs as $sppg)
+                                    <option value="{{ $sppg->code }}" @selected(($filters['sppg'] ?? '') === $sppg->code)>{{ $sppg->code }} - {{ $sppg->name }}</option>
+                                @endforeach
+                            </select>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="space-y-1">
+                            <span class="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">Tanggal</span>
+                            <select name="date_filter" class="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-bold text-slate-600 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10">
+                                <option value="all" @selected(($filters['date_filter'] ?? 'all') === 'all')>Semua</option>
+                                <option value="today" @selected(($filters['date_filter'] ?? 'all') === 'today')>Hari ini</option>
+                                {{-- <option value="range" @selected(($filters['date_filter'] ?? 'all') === 'range')>Rentang</option> --}}
+                            </select>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="space-y-1">
+                            <span class="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">Dari</span>
+                            <input name="date_from" value="{{ $filters['date_from'] ?? '' }}" type="date" class="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-bold text-slate-600 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10">
+                        </label>
+                    </div>
+                    <div>
+                        <label class="space-y-1">
+                            <span class="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">Sampai</span>
+                            <input name="date_to" value="{{ $filters['date_to'] ?? '' }}" type="date" class="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-bold text-slate-600 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10">
+                        </label>
+                    </div>
+                    <button type="submit" class="h-10 rounded-lg bg-blue-600 px-5 text-xs font-black uppercase tracking-wide text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700">Terapkan</button>
+                    <a href="{{ route('surat-jalan.index') }}" class="flex h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-5 text-xs font-black uppercase tracking-wide text-slate-500 transition hover:bg-slate-50">Reset</a>
+                </div>
             </div>
         </form>
 

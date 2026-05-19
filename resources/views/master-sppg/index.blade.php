@@ -39,7 +39,7 @@
                             <th class="w-40 px-6 py-5 text-left text-xs font-black uppercase tracking-[0.2em] text-slate-500">Kode</th>
                             <th class="px-6 py-5 text-left text-xs font-black uppercase tracking-[0.2em] text-slate-500">Nama SPPG</th>
                             <th class="w-52 px-6 py-5 text-left text-xs font-black uppercase tracking-[0.2em] text-slate-500">Lokasi</th>
-                            <th class="w-52 px-6 py-5 text-left text-xs font-black uppercase tracking-[0.2em] text-slate-500">PIC</th>
+                            <th class="w-52 px-6 py-5 text-left text-xs font-black uppercase tracking-[0.2em] text-slate-500">Nama PJ</th>
                             <th class="w-44 px-6 py-5 text-left text-xs font-black uppercase tracking-[0.2em] text-slate-500">WhatsApp</th>
                             <th class="w-36 px-6 py-5 text-center text-xs font-black uppercase tracking-[0.2em] text-slate-500">Aksi</th>
                         </tr>

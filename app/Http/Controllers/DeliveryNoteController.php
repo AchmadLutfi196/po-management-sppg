@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\PurchaseOrder;
+use App\Models\Sppg;
 use App\Models\Supplier;
 use App\Traits\ProcurementHelpers;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,8 +23,28 @@ class DeliveryNoteController extends Controller
             return $redirect;
         }
 
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:120'],
+            'sppg' => ['nullable', 'string', 'exists:sppgs,code'],
+            'date_filter' => ['nullable', 'in:all,today,range'],
+            'date_from' => ['nullable', 'date'],
+            'date_to' => ['nullable', 'date'],
+        ]);
+
+        $filters = [
+            'search' => $filters['search'] ?? '',
+            'sppg' => $filters['sppg'] ?? '',
+            'date_filter' => $filters['date_filter'] ?? 'all',
+            'date_from' => $filters['date_from'] ?? '',
+            'date_to' => $filters['date_to'] ?? '',
+        ];
+
+        if (($filters['date_from'] !== '' || $filters['date_to'] !== '') && $filters['date_filter'] !== 'today') {
+            $filters['date_filter'] = 'range';
+        }
+
         $query = $this->visibleOrdersQuery()->whereIn('status', ['PROCESSING', 'COMPLETED', 'INVOICED']);
-        $search = strtolower($request->string('search')->toString());
+        $search = strtolower($filters['search']);
 
         if ($search !== '') {
             $query->where(function (Builder $builder) use ($search): void {
@@ -33,6 +55,23 @@ class DeliveryNoteController extends Controller
             });
         }
 
+        if ($filters['sppg'] !== '') {
+            $query->whereHas('sppg', fn (Builder $sppg): Builder => $sppg->where('code', $filters['sppg']));
+        }
+
+        if ($filters['date_filter'] === 'today') {
+            $today = now()->toDateString();
+            $this->applyDeliveryDateFilter($query, $today, $today);
+        }
+
+        if ($filters['date_filter'] === 'range' && ($filters['date_from'] !== '' || $filters['date_to'] !== '')) {
+            $this->applyDeliveryDateFilter(
+                $query,
+                $filters['date_from'] !== '' ? $filters['date_from'] : null,
+                $filters['date_to'] !== '' ? $filters['date_to'] : null,
+            );
+        }
+
         return view('surat-jalan.index', [
             'currentUser' => $this->currentUser(),
             'orders' => $query
@@ -40,7 +79,8 @@ class DeliveryNoteController extends Controller
                 ->paginate(10)
                 ->withQueryString()
                 ->through(fn (PurchaseOrder $order): array => $this->orderToArray($order)),
-            'filters' => ['search' => $request->string('search')->toString()],
+            'filters' => $filters,
+            'sppgs' => $this->filterableSppgs(),
         ]);
     }
 
@@ -235,5 +275,44 @@ class DeliveryNoteController extends Controller
             ->first();
 
         return $this->supplierDetails($supplierName)['managing_director_name'];
+    }
+
+    private function applyDeliveryDateFilter(Builder $query, ?string $from, ?string $to): void
+    {
+        $query->where(function (Builder $builder) use ($from, $to): void {
+            $builder
+                ->whereHas('deliveryNote', function (Builder $delivery) use ($from, $to): void {
+                    $this->applyDateBounds($delivery, 'date', $from, $to);
+                })
+                ->orWhere(function (Builder $fallback) use ($from, $to): void {
+                    $fallback
+                        ->whereDoesntHave('deliveryNote')
+                        ->whereNotNull('droping_date');
+
+                    $this->applyDateBounds($fallback, 'droping_date', $from, $to);
+                });
+        });
+    }
+
+    private function applyDateBounds(Builder $query, string $column, ?string $from, ?string $to): void
+    {
+        if ($from !== null) {
+            $query->whereDate($column, '>=', $from);
+        }
+
+        if ($to !== null) {
+            $query->whereDate($column, '<=', $to);
+        }
+    }
+
+    private function filterableSppgs(): EloquentCollection
+    {
+        return Sppg::query()
+            ->when(
+                ($this->currentUser()['role'] ?? null) === 'SPPG',
+                fn (Builder $query): Builder => $query->where('code', $this->currentUser()['id'])
+            )
+            ->orderBy('name')
+            ->get();
     }
 }
