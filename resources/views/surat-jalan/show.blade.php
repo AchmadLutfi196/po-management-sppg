@@ -127,14 +127,20 @@
                             <span class="h-3 w-0.5 rounded-full bg-emerald-500"></span>
                             Foto Bukti Drop
                         </h2>
-                        <div id="main-proof-container" class="{{ $proofPhoto ? 'relative h-32 w-full overflow-hidden rounded-lg bg-slate-100' : 'relative h-32 w-full rounded-lg border-2 border-dashed border-slate-200 bg-slate-50' }}">
-                            <img id="main-proof-preview" src="{{ $proofPhoto ? asset('storage/'.$proofPhoto) : '#' }}" alt="Foto Bukti" class="{{ $proofPhoto ? 'h-full w-full rounded-lg object-cover' : 'hidden h-full w-full rounded-lg object-cover' }}" data-original="{{ $proofPhoto ? asset('storage/'.$proofPhoto) : '' }}">
-                            <div id="main-proof-placeholder" class="{{ $proofPhoto ? 'hidden' : 'flex' }} h-full w-full items-center justify-center text-3xl text-slate-300">📷</div>
-                            @if ($isAdmin)
-                                <button type="button" id="btn-remove-main" class="hidden absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-md hover:bg-red-600" title="Hapus">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                                </button>
-                            @endif
+                        <div class="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-3">
+                            <a
+                                id="main-proof-preview-link"
+                                href="{{ $proofPhoto ? asset('storage/'.$proofPhoto) : '#' }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="{{ $proofPhoto ? 'inline-flex' : 'hidden' }} w-full items-center justify-center gap-2 rounded-lg border border-blue-100 bg-white px-4 py-3 text-xs font-black uppercase tracking-wide text-blue-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50"
+                            >
+                                @include('partials.icon', ['name' => 'eye', 'class' => 'h-4 w-4'])
+                                Preview Foto
+                            </a>
+                            <div id="main-proof-empty" class="{{ $proofPhoto ? 'hidden' : 'flex' }} h-11 items-center justify-center rounded-lg text-xs font-bold text-slate-400">
+                                Belum ada foto bukti
+                            </div>
                         </div>
                         @if ($isAdmin)
                             <label id="lbl-upload-main" class="mt-3 inline-flex w-full cursor-pointer items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700">
@@ -158,11 +164,11 @@
                                 <thead class="bg-slate-50/80">
                                     <tr>
                                         <th class="px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Nama Barang</th>
+                                        <th class="w-44 px-2 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Catatan</th>
                                         <th class="w-20 px-2 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Qty</th>
                                         <th class="w-16 px-2 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Satuan</th>
                                         <th class="w-32 px-2 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Harga</th>
                                         <th class="px-2 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Supplier</th>
-                                        <th class="px-2 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Catatan</th>
                                         <th class="w-24 px-2 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Foto</th>
                                     </tr>
                                 </thead>
@@ -171,6 +177,7 @@
                                         @php $existingPhoto = $order['delivery']['item_photos'][$itemIdx] ?? null; @endphp
                                         <tr class="hover:bg-slate-50/50">
                                             <td class="px-3 py-2 text-sm font-bold text-slate-900">{{ $item['name'] }}</td>
+                                            <td class="px-2 py-2 text-xs text-slate-500">{{ $item['request'] ?? '-' }}</td>
                                             <td class="px-2 py-2"><input name="qty_actual[]" type="number" value="{{ $item['qty'] }}" @readonly(! $isAdmin) class="w-full rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs font-semibold text-slate-800 outline-none focus:border-blue-500"></td>
                                             <td class="px-2 py-2 text-xs font-bold uppercase text-slate-500">{{ $item['unit'] }}</td>
                                             <td class="px-2 py-2">
@@ -186,23 +193,19 @@
                                                     @endforeach
                                                 </select>
                                             </td>
-                                            <td class="px-2 py-2 text-xs text-slate-500">{{ $item['request'] ?? '-' }}</td>
                                             <td class="px-2 py-2">
                                                 <div class="flex items-center gap-2">
-                                                    <div class="relative h-10 w-12 shrink-0">
-                                                        @if ($existingPhoto)
-                                                            <img id="img-preview-{{ $itemIdx }}" src="{{ asset('storage/'.$existingPhoto) }}" alt="Foto" class="h-full w-full rounded border border-slate-200 object-cover" data-original="{{ asset('storage/'.$existingPhoto) }}">
-                                                            <div id="img-placeholder-{{ $itemIdx }}" class="hidden h-full w-full items-center justify-center rounded border border-dashed border-slate-300 bg-slate-50 text-[8px] font-bold text-slate-300">FOTO</div>
-                                                        @else
-                                                            <img id="img-preview-{{ $itemIdx }}" src="#" alt="Preview" class="hidden h-full w-full rounded border border-slate-200 object-cover" data-original="">
-                                                            <div id="img-placeholder-{{ $itemIdx }}" class="flex h-full w-full items-center justify-center rounded border border-dashed border-slate-300 bg-slate-50 text-[8px] font-bold text-slate-300">FOTO</div>
-                                                        @endif
-                                                        @if ($isAdmin)
-                                                            <button type="button" id="btn-remove-{{ $itemIdx }}" class="hidden absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white shadow hover:bg-red-600" title="Hapus">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                                                            </button>
-                                                        @endif
-                                                    </div>
+                                                    <a
+                                                        id="photo-preview-link-{{ $itemIdx }}"
+                                                        href="{{ $existingPhoto ? asset('storage/'.$existingPhoto) : '#' }}"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        class="{{ $existingPhoto ? 'inline-flex' : 'hidden' }} h-8 w-8 shrink-0 items-center justify-center rounded-md border border-blue-100 bg-blue-50 text-blue-600 transition hover:bg-blue-100"
+                                                        title="Preview foto"
+                                                        aria-label="Preview foto {{ $item['name'] }}"
+                                                    >
+                                                        @include('partials.icon', ['name' => 'eye', 'class' => 'h-4 w-4'])
+                                                    </a>
                                                     @if ($isAdmin)
                                                         <label id="lbl-upload-{{ $itemIdx }}" class="cursor-pointer rounded-md border border-blue-100 bg-blue-50 px-2 py-1 text-[9px] font-bold uppercase tracking-wide text-blue-600 transition hover:bg-blue-100">
                                                             {{ $existingPhoto ? 'Ganti' : 'Upload' }}
@@ -235,105 +238,46 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const photoInputs = document.querySelectorAll('.photo-input');
-            photoInputs.forEach(input => {
+            document.querySelectorAll('.photo-input').forEach((input) => {
                 input.addEventListener('change', function () {
                     const idx = this.getAttribute('data-idx');
-                    const imgPreview = document.getElementById('img-preview-' + idx);
-                    const imgPlaceholder = document.getElementById('img-placeholder-' + idx);
-                    const btnRemove = document.getElementById('btn-remove-' + idx);
-                    const lblUpload = document.getElementById('lbl-upload-' + idx);
+                    const previewLink = document.getElementById('photo-preview-link-' + idx);
+                    const uploadLabel = document.getElementById('lbl-upload-' + idx);
 
-                    if (this.files && this.files[0]) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            imgPreview.src = e.target.result;
-                            imgPreview.classList.remove('hidden');
-                            imgPlaceholder.classList.add('hidden');
-                            imgPlaceholder.classList.remove('flex');
-                            btnRemove.classList.remove('hidden');
-                            lblUpload.classList.add('hidden');
+                    if (this.files && this.files[0] && previewLink) {
+                        previewLink.href = URL.createObjectURL(this.files[0]);
+                        previewLink.classList.remove('hidden');
+                        previewLink.classList.add('inline-flex');
+
+                        if (uploadLabel) {
+                            uploadLabel.childNodes[0].textContent = 'Ganti';
                         }
-                        reader.readAsDataURL(this.files[0]);
                     }
                 });
             });
 
-            document.querySelectorAll('button[id^="btn-remove-"]').forEach(btn => {
-                if (btn.id === 'btn-remove-main') return;
-                btn.addEventListener('click', function() {
-                    const idx = this.id.replace('btn-remove-', '');
-                    const input = document.querySelector('input[data-idx="'+idx+'"]');
-                    const imgPreview = document.getElementById('img-preview-' + idx);
-                    const imgPlaceholder = document.getElementById('img-placeholder-' + idx);
-                    const lblUpload = document.getElementById('lbl-upload-' + idx);
-
-                    input.value = '';
-                    const originalSrc = imgPreview.getAttribute('data-original');
-                    if (originalSrc) {
-                        imgPreview.src = originalSrc;
-                        imgPreview.classList.remove('hidden');
-                        imgPlaceholder.classList.add('hidden');
-                        imgPlaceholder.classList.remove('flex');
-                    } else {
-                        imgPreview.src = '#';
-                        imgPreview.classList.add('hidden');
-                        imgPlaceholder.classList.remove('hidden');
-                        imgPlaceholder.classList.add('flex');
-                    }
-                    this.classList.add('hidden');
-                    lblUpload.classList.remove('hidden');
-                });
-            });
-
-            // Main proof photo
             const mainPhotoInput = document.getElementById('main-photo-input');
             if (mainPhotoInput) {
-                const mainPreview = document.getElementById('main-proof-preview');
-                const mainPlaceholder = document.getElementById('main-proof-placeholder');
-                const btnRemoveMain = document.getElementById('btn-remove-main');
-                const lblUploadMain = document.getElementById('lbl-upload-main');
-                const lblUploadMainText = document.getElementById('lbl-upload-main-text');
+                const previewLink = document.getElementById('main-proof-preview-link');
+                const emptyState = document.getElementById('main-proof-empty');
+                const uploadLabelText = document.getElementById('lbl-upload-main-text');
                 const filenameSpan = document.getElementById('lbl-main-filename');
-                const container = document.getElementById('main-proof-container');
 
                 mainPhotoInput.addEventListener('change', function () {
-                    if (this.files && this.files[0]) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            mainPreview.src = e.target.result;
-                            mainPreview.classList.remove('hidden');
-                            mainPlaceholder.classList.add('hidden');
-                            mainPlaceholder.classList.remove('flex');
-                            btnRemoveMain.classList.remove('hidden');
-                            container.className = 'relative h-32 w-full overflow-hidden rounded-lg bg-slate-100';
-                            lblUploadMainText.textContent = 'Ganti Foto';
-                            filenameSpan.textContent = mainPhotoInput.files[0].name;
-                        }
-                        reader.readAsDataURL(this.files[0]);
-                    }
-                });
+                    if (this.files && this.files[0] && previewLink) {
+                        previewLink.href = URL.createObjectURL(this.files[0]);
+                        previewLink.classList.remove('hidden');
+                        previewLink.classList.add('inline-flex');
+                        emptyState?.classList.add('hidden');
 
-                btnRemoveMain.addEventListener('click', function() {
-                    mainPhotoInput.value = '';
-                    filenameSpan.textContent = '';
-                    const originalSrc = mainPreview.getAttribute('data-original');
-                    if (originalSrc) {
-                        mainPreview.src = originalSrc;
-                        mainPreview.classList.remove('hidden');
-                        mainPlaceholder.classList.add('hidden');
-                        mainPlaceholder.classList.remove('flex');
-                        container.className = 'relative h-32 w-full overflow-hidden rounded-lg bg-slate-100';
-                        lblUploadMainText.textContent = 'Ganti Foto';
-                    } else {
-                        mainPreview.src = '#';
-                        mainPreview.classList.add('hidden');
-                        mainPlaceholder.classList.remove('hidden');
-                        mainPlaceholder.classList.add('flex');
-                        container.className = 'relative h-32 w-full rounded-lg border-2 border-dashed border-slate-200 bg-slate-50';
-                        lblUploadMainText.textContent = 'Pilih Foto';
+                        if (uploadLabelText) {
+                            uploadLabelText.textContent = 'Ganti Foto';
+                        }
+
+                        if (filenameSpan) {
+                            filenameSpan.textContent = this.files[0].name;
+                        }
                     }
-                    this.classList.add('hidden');
                 });
             }
         });
