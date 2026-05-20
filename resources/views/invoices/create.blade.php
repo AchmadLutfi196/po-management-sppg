@@ -31,7 +31,7 @@
             </header>
 
             <div class="space-y-4 px-4 py-4 sm:px-6 sm:py-5">
-                {{-- Top: Ringkasan + Rekening (horizontal) --}}
+                {{-- Top: Ringkasan + Rekening + Tombol --}}
                 <div class="grid grid-cols-1 gap-3 lg:grid-cols-12">
                     <div class="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm lg:col-span-4">
                         <div>
@@ -175,7 +175,6 @@
                 input.value = digits ? formatNumber(Number(digits)) : '';
             };
 
-            // Stock items map for autocomplete unit fill
             const stockItemsByName = {};
             @foreach ($stockItems as $stock)
                 stockItemsByName['{{ strtoupper($stock['name']) }}'] = '{{ $stock['unit'] ?? 'KG' }}';
@@ -189,7 +188,6 @@
                 if (itemsCountLabel) itemsCountLabel.textContent = rows.length;
 
                 rows.forEach((row, index) => {
-                    // Update row number
                     const numCell = row.querySelector('td:first-child');
                     if (numCell) numCell.textContent = index + 1;
 
@@ -281,7 +279,6 @@
                 });
             }
 
-            // Initial listeners
             form.querySelectorAll('.invoice-qty, .invoice-price').forEach((input) => {
                 input.addEventListener('input', () => {
                     if (input.classList.contains('invoice-price')) formatPriceInput(input);

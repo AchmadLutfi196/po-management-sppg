@@ -175,7 +175,6 @@ class InvoiceController extends Controller
             return $redirect;
         }
 
-        $this->authorizeAdmin();
         $order = $this->findOrderModel($id);
         $supplierName = $request->string('supplier')->toString() ?: $order->items->first()?->supplier?->name;
         $items = $order->items
@@ -199,7 +198,6 @@ class InvoiceController extends Controller
             return $redirect;
         }
 
-        $this->authorizeAdmin();
         $order = $this->findOrderModel($id);
         $request->merge([
             'items' => collect($request->input('items', []))

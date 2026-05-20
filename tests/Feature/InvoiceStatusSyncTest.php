@@ -254,11 +254,11 @@ test('invoice create shows supplier bank accounts', function (string $supplierNa
 })->with([
     'viala pangan' => [
         'VIALA PANGAN',
-        ['AN. Arif Rakhman Hadi', 'MANDIRI: 1420015180150'],
+        ['AN. Dwi Silvia Anggraini', 'MANDIRI: 1420026949999'],
     ],
     'nutriva foods' => [
         'NUTRIVA FOODS',
-        ['AN. Arif Rakhman Hadi', 'MANDIRI: 1420015180150'],
+        ['AN. Dessy Istuning Tiyas', 'MANDIRI: 1420026949973'],
     ],
     'dunia bumbu mojokerto' => [
         'DUNIA BUMBU MOJOKERTO',
@@ -266,15 +266,14 @@ test('invoice create shows supplier bank accounts', function (string $supplierNa
     ],
 ]);
 
-test('invoice preview uses global bank account and supplier managing director', function (): void {
+test('invoice preview uses supplier bank account and managing director', function (): void {
     $order = invoiceBankInfoOrder('VIALA PANGAN');
 
     $this->get(route('invoices.preview', ['id' => $order->id, 'supplier' => 'VIALA PANGAN']))
         ->assertOk()
-        ->assertSeeText('AN. Arif Rakhman Hadi')
         ->assertSeeText('Dwi Silvia Anggraini')
         ->assertSeeText('MANDIRI')
-        ->assertSeeText('1420015180150');
+        ->assertSeeText('1420026949999');
 });
 
 test('dunia bumbu invoice preview uses arif as managing director', function (): void {

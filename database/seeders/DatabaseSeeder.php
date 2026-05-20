@@ -75,9 +75,9 @@ class DatabaseSeeder extends Seeder
                 'logo_path' => 'logo-viala.jpeg',
                 'stamp_path' => 'stamp-viala.jpeg',
                 'theme_color' => '#2563eb',
-                'bank_name' => 'BCA',
+                'bank_name' => 'MANDIRI',
                 'bank_account_name' => 'Dwi Silvia Anggraini',
-                'bank_account_number' => '6140564859',
+                'bank_account_number' => '1420026949999',
             ],
         ];
 

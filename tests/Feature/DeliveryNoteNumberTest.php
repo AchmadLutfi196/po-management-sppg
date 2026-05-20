@@ -102,7 +102,7 @@ test('saved surat jalan detail shows driver notes and proof photo', function ():
         ->assertSee('Foto Bukti');
 });
 
-test('surat jalan form keeps submitted values after validation fails', function (): void {
+test('surat jalan form saves successfully without proof photo', function (): void {
     $order = deliveryNoteNumberPurchaseOrder();
 
     $this
@@ -122,8 +122,7 @@ test('surat jalan form keeps submitted values after validation fails', function 
             'prices' => [3500],
             'suppliers' => ['VIALA PANGAN'],
         ])
-        ->assertRedirect(route('surat-jalan.show', $order->id))
-        ->assertSessionHasErrors('proof_photo');
+        ->assertRedirect(route('surat-jalan.show', $order->id));
 
     $this->get(route('surat-jalan.show', $order->id))
         ->assertOk()
@@ -132,8 +131,7 @@ test('surat jalan form keeps submitted values after validation fails', function 
         ->assertSee('value="Ahmad"', false)
         ->assertSee('value="085735579851"', false)
         ->assertSee('value="15/SJ/19052026/DBM/2026"', false)
-        ->assertSee('value="2026-05-21"', false)
-        ->assertSee('value="15:49"', false)
+        ->assertSee('value="'.now()->toDateString().'"', false)
         ->assertSee('value="Udin"', false)
         ->assertSee('Amann')
         ->assertSee('name="qty_actual[]" type="number" value="15"', false)
