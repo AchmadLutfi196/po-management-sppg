@@ -102,6 +102,124 @@ test('saved surat jalan detail shows driver notes and proof photo', function ():
         ->assertSee('Foto Bukti');
 });
 
+test('surat jalan form keeps submitted values after validation fails', function (): void {
+    $order = deliveryNoteNumberPurchaseOrder();
+
+    $this
+        ->from(route('surat-jalan.show', $order->id))
+        ->patch(route('surat-jalan.update', $order->id), [
+            'kepada' => 'SPPG Pulo',
+            'kd_sppg' => 'M1102',
+            'nama_sppg' => 'SPPG Pulo',
+            'pj_sppg' => 'Ahmad',
+            'whatsapp' => '085735579851',
+            'surat_jalan_no' => '15/SJ/19052026/DBM/2026',
+            'delivery_date' => '2026-05-21',
+            'delivery_time' => '15:49',
+            'driver' => 'Udin',
+            'notes' => 'Amann',
+            'qty_actual' => [15],
+            'prices' => [3500],
+            'suppliers' => ['VIALA PANGAN'],
+        ])
+        ->assertRedirect(route('surat-jalan.show', $order->id))
+        ->assertSessionHasErrors('proof_photo');
+
+    $this->get(route('surat-jalan.show', $order->id))
+        ->assertOk()
+        ->assertSee('value="SPPG Pulo"', false)
+        ->assertSee('value="M1102"', false)
+        ->assertSee('value="Ahmad"', false)
+        ->assertSee('value="085735579851"', false)
+        ->assertSee('value="15/SJ/19052026/DBM/2026"', false)
+        ->assertSee('value="2026-05-21"', false)
+        ->assertSee('value="15:49"', false)
+        ->assertSee('value="Udin"', false)
+        ->assertSee('Amann')
+        ->assertSee('name="qty_actual[]" type="number" value="15"', false)
+        ->assertSee('name="prices[]" type="text" inputmode="numeric" data-currency-input value="3500"', false);
+});
+
+test('surat jalan creation does not change item supplier', function (): void {
+    Storage::fake('public');
+    $order = deliveryNoteNumberPurchaseOrder();
+    Supplier::query()->create(['name' => 'NUTRIVA FOODS']);
+
+    $this->patch(route('surat-jalan.update', $order->id), [
+        'kepada' => 'SPPG Balongsari',
+        'kd_sppg' => 'M1101',
+        'nama_sppg' => 'SPPG Balongsari',
+        'pj_sppg' => 'Datok',
+        'whatsapp' => '0894334444',
+        'surat_jalan_no' => '2/SJ/18052026/VP/2026',
+        'delivery_date' => '2026-05-20',
+        'driver' => 'Udin',
+        'notes' => 'Aman',
+        'qty_actual' => [7],
+        'prices' => [2500],
+        'suppliers' => ['NUTRIVA FOODS'],
+        'proof_photo' => UploadedFile::fake()->image('bukti.png'),
+    ])->assertRedirect(route('surat-jalan.show', $order->id));
+
+    $item = $order->refresh()->items()->firstOrFail();
+
+    expect((float) $item->qty)->toBe(7.0)
+        ->and($item->price)->toBe(2500)
+        ->and($item->supplier?->name)->toBe('VIALA PANGAN');
+});
+
+test('surat jalan locks item values and supplier after it is saved', function (): void {
+    Storage::fake('public');
+    $order = deliveryNoteNumberPurchaseOrder();
+
+    $this->patch(route('surat-jalan.update', $order->id), [
+        'kepada' => 'SPPG Balongsari',
+        'kd_sppg' => 'M1101',
+        'nama_sppg' => 'SPPG Balongsari',
+        'pj_sppg' => 'Datok',
+        'whatsapp' => '0894334444',
+        'surat_jalan_no' => '2/SJ/18052026/VP/2026',
+        'delivery_date' => '2026-05-20',
+        'driver' => 'Udin',
+        'notes' => 'Aman',
+        'qty_actual' => [7],
+        'prices' => [2500],
+        'suppliers' => ['VIALA PANGAN'],
+        'proof_photo' => UploadedFile::fake()->image('bukti.png'),
+    ])->assertRedirect(route('surat-jalan.show', $order->id));
+
+    $lockedSupplier = Supplier::query()->create(['name' => 'NUTRIVA FOODS']);
+
+    $this->patch(route('surat-jalan.update', $order->id), [
+        'kepada' => 'SPPG Balongsari',
+        'kd_sppg' => 'M1101',
+        'nama_sppg' => 'SPPG Balongsari',
+        'pj_sppg' => 'Datok',
+        'whatsapp' => '0894334444',
+        'surat_jalan_no' => '2/SJ/18052026/VP/2026',
+        'delivery_date' => '2026-05-21',
+        'driver' => 'Jamal',
+        'notes' => 'Update catatan',
+        'qty_actual' => [99],
+        'prices' => [9900],
+        'suppliers' => [$lockedSupplier->name],
+    ])->assertRedirect(route('surat-jalan.show', $order->id));
+
+    $item = $order->refresh()->items()->firstOrFail();
+
+    expect((float) $item->qty)->toBe(7.0)
+        ->and($item->price)->toBe(2500)
+        ->and($item->supplier?->name)->toBe('VIALA PANGAN')
+        ->and($order->deliveryNote->refresh()->driver)->toBe('Jamal');
+
+    $this->get(route('surat-jalan.show', $order->id))
+        ->assertOk()
+        ->assertSee('name="qty_actual[]" type="number" value="7" readonly', false)
+        ->assertSee('name="prices[]" type="text" inputmode="numeric" data-currency-input value="2500" readonly', false)
+        ->assertSee('name="suppliers[]" value="VIALA PANGAN"', false)
+        ->assertSee('<select disabled', false);
+});
+
 test('surat jalan preview prepared by uses supplier account holder name', function (): void {
     $order = deliveryNoteNumberPurchaseOrder(
         supplierName: 'NUTRIVA FOODS',

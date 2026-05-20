@@ -83,6 +83,33 @@ test('invoice history shows item details', function (): void {
         ->assertSeeText('Rp 500.000');
 });
 
+test('creating invoice syncs item quantity and price back to purchase order', function (): void {
+    $order = invoiceBankInfoOrder('VIALA PANGAN');
+    $item = $order->items()->firstOrFail();
+
+    $this->post(route('invoices.store', $order->id), [
+        'supplier' => 'VIALA PANGAN',
+        'invoice_no' => 'INV/VIALA/SYNC-1',
+        'invoice_date' => '2026-05-19',
+        'items' => [
+            [
+                'id' => $item->id,
+                'name' => $item->name,
+                'unit' => $item->unit,
+                'qty' => 200,
+                'price' => 20000,
+            ],
+        ],
+    ])->assertRedirect(route('invoices.index', ['tab' => 'history']));
+
+    $item->refresh();
+
+    expect((float) $item->qty)->toBe(200.0)
+        ->and($item->price)->toBe(20000)
+        ->and($item->is_invoiced)->toBeTrue()
+        ->and($order->refresh()->total_amount)->toBe(4000000);
+});
+
 test('invoice create shows supplier bank accounts', function (string $supplierName, array $expectedTexts): void {
     $order = invoiceBankInfoOrder($supplierName);
 

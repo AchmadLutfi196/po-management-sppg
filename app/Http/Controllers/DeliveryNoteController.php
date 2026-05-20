@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\PurchaseOrder;
 use App\Models\Sppg;
-use App\Models\Supplier;
 use App\Traits\ProcurementHelpers;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -116,6 +115,7 @@ class DeliveryNoteController extends Controller
         $this->authorizeAdmin();
         $order = $this->findOrderModel($id);
         $existingDeliveryNote = $order->deliveryNote;
+        $canUpdateItemValues = $existingDeliveryNote === null;
         $validated = $request->validate([
             'kepada' => ['required', 'string', 'max:120'],
             'kd_sppg' => ['nullable', 'string', 'max:40'],
@@ -131,8 +131,6 @@ class DeliveryNoteController extends Controller
             'qty_actual.*' => ['required', 'numeric', 'min:0'],
             'prices' => ['required', 'array'],
             'prices.*' => ['required', 'numeric', 'min:0'],
-            'suppliers' => ['required', 'array'],
-            'suppliers.*' => ['required', 'exists:suppliers,name'],
             'item_photos' => ['nullable', 'array'],
             'item_photos.*' => ['nullable', 'image', 'max:5120'],
             'proof_photo' => [$existingDeliveryNote?->proof_photo ? 'nullable' : 'required', 'image', 'max:10240'],
@@ -159,7 +157,7 @@ class DeliveryNoteController extends Controller
 
         $hasPhoto = count(array_filter($uploadedPhotos)) > 0 || $proofPhotoPath !== null;
 
-        DB::transaction(function () use ($order, $validated, $uploadedPhotos, $hasPhoto, $proofPhotoPath): void {
+        DB::transaction(function () use ($order, $validated, $uploadedPhotos, $hasPhoto, $proofPhotoPath, $canUpdateItemValues): void {
             $order->deliveryNote()->updateOrCreate(
                 ['purchase_order_id' => $order->id],
                 [
@@ -180,11 +178,13 @@ class DeliveryNoteController extends Controller
             );
 
             foreach ($order->items as $index => $item) {
-                $supplier = Supplier::query()->where('name', $validated['suppliers'][$index] ?? null)->first();
+                if (! $canUpdateItemValues) {
+                    continue;
+                }
+
                 $item->update([
                     'qty' => $validated['qty_actual'][$index] ?? $item->qty,
                     'price' => $validated['prices'][$index] ?? $item->price,
-                    'supplier_id' => $supplier?->id ?? $item->supplier_id,
                 ]);
             }
 
@@ -230,8 +230,6 @@ class DeliveryNoteController extends Controller
             'qty_actual.*' => ['required', 'numeric', 'min:0'],
             'prices' => ['required', 'array'],
             'prices.*' => ['required', 'numeric', 'min:0'],
-            'suppliers' => ['required', 'array'],
-            'suppliers.*' => ['required', 'exists:suppliers,name'],
         ]);
 
         $order = $this->findOrderArray($id);
@@ -254,7 +252,6 @@ class DeliveryNoteController extends Controller
         foreach ($order['items'] as $index => $item) {
             $order['items'][$index]['qty'] = (float) ($validated['qty_actual'][$index] ?? $item['qty']);
             $order['items'][$index]['price'] = $validated['prices'][$index] ?? $item['price'];
-            $order['items'][$index]['supplier'] = $validated['suppliers'][$index] ?? $item['supplier'];
         }
 
         return view('surat-jalan.preview', [

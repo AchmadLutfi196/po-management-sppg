@@ -6,6 +6,8 @@
         $invoiceTotal = collect($order['invoices'] ?? [])->sum('total_amount');
         $dropSchedule = $order['droping_date'] ? $order['droping_date'].' '.$order['droping_time'] : '-';
         $isLocked = in_array($order['status'], ['COMPLETED', 'INVOICED'], true);
+        $canEditSupplier = $currentUser['role'] === 'ADMIN' && ! $isLocked;
+        $canEditItemValues = $currentUser['role'] === 'ADMIN' && ! $isLocked && $order['status'] === 'PROCESSING';
     @endphp
 
     <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/45 p-2 backdrop-blur-sm sm:p-5">
@@ -112,7 +114,7 @@
                                             <span class="mt-2 inline-flex rounded bg-emerald-50 px-2 py-1 text-xs font-black text-emerald-600">{{ $item['grade'] }}</span>
                                         </td>
                                         <td class="px-5 py-4">
-                                            @if ($currentUser['role'] === 'ADMIN' && ! $isLocked)
+                                            @if ($canEditSupplier)
                                                 <select name="suppliers[]" class="w-full rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-black uppercase text-blue-600 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10">
                                                     @foreach ($suppliers as $supplier)
                                                         <option value="{{ $supplier }}" @selected($item['supplier'] === $supplier)>{{ $supplier }}</option>
@@ -122,8 +124,26 @@
                                                 <span class="inline-flex w-full rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-black uppercase text-blue-600">{{ $item['supplier'] }}</span>
                                             @endif
                                         </td>
-                                        <td class="px-5 py-4 text-right text-sm font-black text-slate-700">{{ $item['qty'] }} <span class="text-xs uppercase text-slate-400">{{ $item['unit'] }}</span></td>
-                                        <td class="px-5 py-4 text-right text-sm font-medium text-slate-500">Rp {{ number_format($item['price'], 0, ',', '.') }}</td>
+                                        <td class="px-5 py-4 text-right">
+                                            @if ($canEditItemValues)
+                                                <div class="ml-auto flex w-32 items-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10">
+                                                    <input name="qty_actual[]" type="number" min="0.01" step="0.01" value="{{ $item['qty'] }}" class="min-w-0 flex-1 bg-transparent text-right text-sm font-black text-slate-700 outline-none">
+                                                    <span class="ml-2 shrink-0 text-xs font-black uppercase text-slate-400">{{ $item['unit'] }}</span>
+                                                </div>
+                                            @else
+                                                <span class="text-sm font-black text-slate-700">{{ $item['qty'] }} <span class="text-xs uppercase text-slate-400">{{ $item['unit'] }}</span></span>
+                                            @endif
+                                        </td>
+                                        <td class="px-5 py-4 text-right">
+                                            @if ($canEditItemValues)
+                                                <div class="ml-auto flex w-36 items-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10">
+                                                    <span class="mr-2 text-xs font-black text-slate-400">Rp</span>
+                                                    <input name="prices[]" type="text" inputmode="numeric" data-currency-input value="{{ $item['price'] }}" class="min-w-0 flex-1 bg-transparent text-right text-sm font-semibold text-slate-700 outline-none">
+                                                </div>
+                                            @else
+                                                <span class="text-sm font-medium text-slate-500">Rp {{ number_format($item['price'], 0, ',', '.') }}</span>
+                                            @endif
+                                        </td>
                                         <td class="px-5 py-4 text-right text-sm font-black text-slate-950">Rp {{ number_format($item['qty'] * $item['price'], 0, ',', '.') }}</td>
                                     </tr>
                                 @endforeach
@@ -141,7 +161,7 @@
                     </div>
                 @elseif ($currentUser['role'] === 'ADMIN' && ! $isLocked)
                     <div class="sticky bottom-0 -mx-3 -mb-4 flex flex-col gap-2 border-t border-emerald-100 bg-emerald-50 px-3 py-3 text-xs font-black uppercase tracking-[0.12em] text-emerald-700 sm:-mx-6 sm:-mb-5 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:tracking-[0.14em]">
-                        <span>Terdapat perubahan penugasan supplier yang bisa disimpan.</span>
+                        <span>{{ $canEditItemValues ? 'Terdapat perubahan supplier, qty, atau harga yang bisa disimpan.' : 'Terdapat perubahan penugasan supplier yang bisa disimpan.' }}</span>
                         <button type="submit" class="underline underline-offset-4">Simpan Sekarang</button>
                     </div>
                 @endif

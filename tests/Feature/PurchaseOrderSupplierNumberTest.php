@@ -124,6 +124,29 @@ test('PurchaseOrderSupplier published supplier change only updates supplier code
         ->and($order->items()->first()->supplier->name)->toBe('VIALA PANGAN');
 });
 
+test('PurchaseOrderSupplier processing detail can update quantity and price', function (): void {
+    $data = purchaseOrderSupplierFixture();
+    $order = publishedPurchaseOrder($data, '22/PO/17052026/VP/2026', [
+        ['stock' => $data['stocks']['ayam'], 'supplier' => 'VIALA PANGAN'],
+    ]);
+
+    $this->get(route('purchase-orders.show', $order->id))
+        ->assertOk()
+        ->assertSee('name="qty_actual[]"', false)
+        ->assertSee('name="prices[]"', false);
+
+    $this->patch(route('purchase-orders.suppliers.update', $order->id), [
+        'suppliers' => ['VIALA PANGAN'],
+        'qty_actual' => [5],
+        'prices' => [7500],
+    ])->assertRedirect(route('purchase-orders.index'));
+
+    $item = $order->refresh()->items()->first();
+
+    expect((float) $item->qty)->toBe(5.0)
+        ->and((int) $item->price)->toBe(7500);
+});
+
 test('PurchaseOrderSupplier published resplit keeps original base date and year', function (): void {
     $data = purchaseOrderSupplierFixture();
     $order = publishedPurchaseOrder($data, '22/PO/17052026/DBM/2026', [

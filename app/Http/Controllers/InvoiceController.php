@@ -143,6 +143,7 @@ class InvoiceController extends Controller
 
                 if (! empty($itemData['id'])) {
                     PurchaseOrderItem::query()->whereKey($itemData['id'])->update([
+                        'qty' => $itemData['qty'],
                         'price' => $itemData['price'],
                         'is_invoiced' => true,
                     ]);

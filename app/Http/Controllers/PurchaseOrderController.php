@@ -202,22 +202,43 @@ class PurchaseOrderController extends Controller
         $validated = $request->validate([
             'suppliers' => ['required', 'array'],
             'suppliers.*' => ['nullable', 'exists:suppliers,name'],
+            'qty_actual' => ['nullable', 'array'],
+            'qty_actual.*' => ['nullable', 'numeric', 'min:0.01'],
+            'prices' => ['nullable', 'array'],
+            'prices.*' => ['nullable', 'numeric', 'min:0'],
         ]);
         $splitCount = 0;
 
         DB::transaction(function () use ($order, $validated, &$splitCount): void {
             $items = $order->items()->orderBy('id')->get();
+            $canUpdateItemValues = $order->status === 'PROCESSING';
+            $submittedQuantities = $validated['qty_actual'] ?? [];
+            $submittedPrices = $validated['prices'] ?? [];
 
             foreach (array_values($validated['suppliers']) as $index => $supplierName) {
                 $supplier = $supplierName
                     ? Supplier::query()->where('name', $supplierName)->first()
                     : null;
 
-                $items->get($index)?->update(['supplier_id' => $supplier?->id]);
+                $item = $items->get($index);
+
+                if (! $item) {
+                    continue;
+                }
+
+                $updates = [
+                    'supplier_id' => $supplier?->id,
+                ];
+
+                if ($canUpdateItemValues) {
+                    $updates['qty'] = $submittedQuantities[$index] ?? $item->qty;
+                    $updates['price'] = $submittedPrices[$index] ?? $item->price;
+                }
+
+                $item->update($updates);
             }
 
             $splitCount = $this->publishOrResplitPurchaseOrder($order->refresh());
-
         });
 
         $message = $splitCount > 0

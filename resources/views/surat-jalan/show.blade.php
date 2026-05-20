@@ -5,20 +5,21 @@
         $delivery    = $order['delivery'] ?? [];
         $hasDelivery = ! empty($order['delivery']);
         $isAdmin     = ($currentUser['role'] ?? null) === 'ADMIN';
+        $canEditItemValues = $isAdmin && ! $hasDelivery;
 
         $firstSupplier = collect($order['items'])->pluck('supplier')->filter(fn ($s) => $s !== '-')->first() ?? '-';
-        $sjNumber      = $delivery['number'] ?? $order['delivery_suggested_number'];
+        $sjNumber      = old('surat_jalan_no', $delivery['number'] ?? $order['delivery_suggested_number']);
 
-        $kepada       = $delivery['kepada']    ?? $sppg['name'];
-        $kdSppg       = $delivery['kd_sppg']   ?? $sppg['code'];
-        $namaSppg     = $delivery['nama_sppg'] ?? $sppg['name'];
-        $pjSppg       = $delivery['pj_sppg']   ?? $sppg['pic_name'];
-        $whatsapp     = $delivery['whatsapp']  ?? $sppg['whatsapp'];
+        $kepada       = old('kepada', $delivery['kepada'] ?? $sppg['name']);
+        $kdSppg       = old('kd_sppg', $delivery['kd_sppg'] ?? $sppg['code']);
+        $namaSppg     = old('nama_sppg', $delivery['nama_sppg'] ?? $sppg['name']);
+        $pjSppg       = old('pj_sppg', $delivery['pj_sppg'] ?? $sppg['pic_name']);
+        $whatsapp     = old('whatsapp', $delivery['whatsapp'] ?? $sppg['whatsapp']);
 
-        $deliveryDate = $delivery['date'] ?? ($order['droping_date'] ?? now()->format('Y-m-d'));
-        $deliveryTime = $delivery['time'] ?? ($order['droping_time'] ?? '');
-        $driver       = $delivery['driver'] ?? '';
-        $notes        = $delivery['notes']  ?? '';
+        $deliveryDate = old('delivery_date', $delivery['date'] ?? ($order['droping_date'] ?? now()->format('Y-m-d')));
+        $deliveryTime = old('delivery_time', $delivery['time'] ?? ($order['droping_time'] ?? ''));
+        $driver       = old('driver', $delivery['driver'] ?? '');
+        $notes        = old('notes', $delivery['notes'] ?? '');
 
         $title = $hasDelivery || ! $isAdmin ? 'Detail Surat Jalan: '.$sjNumber : 'Buat Surat Jalan: '.$order['number'];
         $proofPhoto = $order['delivery']['proof_photo'] ?? null;
@@ -180,16 +181,17 @@
                                         <tr class="hover:bg-slate-50/50">
                                             <td class="px-3 py-2 text-sm font-bold text-slate-900">{{ $item['name'] }}</td>
                                             <td class="px-2 py-2 text-xs text-slate-500">{{ $item['request'] ?? '-' }}</td>
-                                            <td class="px-2 py-2"><input name="qty_actual[]" type="number" value="{{ $item['qty'] }}" @readonly(! $isAdmin) class="w-full rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs font-semibold text-slate-800 outline-none focus:border-blue-500"></td>
+                                            <td class="px-2 py-2"><input name="qty_actual[]" type="number" value="{{ old("qty_actual.$itemIdx", $item['qty']) }}" @readonly(! $canEditItemValues) class="w-full rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs font-semibold text-slate-800 outline-none focus:border-blue-500 disabled:cursor-not-allowed disabled:text-slate-400"></td>
                                             <td class="px-2 py-2 text-xs font-bold uppercase text-slate-500">{{ $item['unit'] }}</td>
                                             <td class="px-2 py-2">
                                                 <div class="flex items-center rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 focus-within:border-blue-500">
                                                     <span class="mr-1 text-[9px] font-bold text-slate-400">Rp</span>
-                                                    <input name="prices[]" type="text" inputmode="numeric" data-currency-input value="{{ $item['price'] }}" @readonly(! $isAdmin) class="min-w-0 flex-1 bg-transparent text-xs font-semibold text-slate-800 outline-none">
+                                                    <input name="prices[]" type="text" inputmode="numeric" data-currency-input value="{{ old("prices.$itemIdx", $item['price']) }}" @readonly(! $canEditItemValues) class="min-w-0 flex-1 bg-transparent text-xs font-semibold text-slate-800 outline-none disabled:cursor-not-allowed disabled:text-slate-400">
                                                 </div>
                                             </td>
                                             <td class="px-2 py-2">
-                                                <select name="suppliers[]" @disabled(! $isAdmin) class="w-full min-w-[140px] rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs font-semibold uppercase text-slate-800 outline-none focus:border-blue-500">
+                                                <input type="hidden" name="suppliers[]" value="{{ $item['supplier'] }}">
+                                                <select @disabled(true) class="w-full min-w-[140px] cursor-not-allowed rounded-md border border-slate-200 bg-slate-100 px-2 py-1.5 text-xs font-semibold uppercase text-slate-500 outline-none">
                                                     @foreach ($suppliers as $supplier)
                                                         <option value="{{ $supplier }}" @selected($item['supplier'] === $supplier)>{{ $supplier }}</option>
                                                     @endforeach
