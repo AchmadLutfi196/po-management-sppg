@@ -102,7 +102,7 @@ test('saved surat jalan detail shows driver notes and proof photo', function ():
         ->assertSee('Foto Bukti');
 });
 
-test('surat jalan form keeps submitted values after validation fails', function (): void {
+test('surat jalan form saves successfully without proof photo', function (): void {
     $order = deliveryNoteNumberPurchaseOrder();
 
     $this
@@ -122,8 +122,7 @@ test('surat jalan form keeps submitted values after validation fails', function 
             'prices' => [3500],
             'suppliers' => ['VIALA PANGAN'],
         ])
-        ->assertRedirect(route('surat-jalan.show', $order->id))
-        ->assertSessionHasErrors('proof_photo');
+        ->assertRedirect(route('surat-jalan.show', $order->id));
 
     $this->get(route('surat-jalan.show', $order->id))
         ->assertOk()

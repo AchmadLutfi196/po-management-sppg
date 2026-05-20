@@ -9,16 +9,11 @@
     </div>
 
     <div class="flex flex-wrap items-center gap-2">
-        @unless (request()->routeIs('dashboard'))
+        @if (request()->routeIs('purchase-orders.index'))
             <a href="{{ route('purchase-orders.create') }}" class="rounded-lg bg-blue-600 px-3 py-2 text-xs font-black text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700 sm:px-4">
                 PO Baru
             </a>
-        @endunless
-
-        @if (($currentUser['role'] ?? null) === 'ADMIN' && ! request()->routeIs('dashboard'))
-            <button type="button" class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50 sm:px-4">
-                Ekspor
-            </button>
         @endif
+
     </div>
 </header>

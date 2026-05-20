@@ -403,9 +403,17 @@ trait ProcurementHelpers
      */
     private function supplierBankAccounts(?string $supplier): array
     {
-        return [
-            ['bank' => 'MANDIRI', 'account_name' => 'Arif Rakhman Hadi', 'number' => '1420015180150'],
-        ];
+        return match ($supplier) {
+            'VIALA PANGAN' => [
+                ['bank' => 'MANDIRI', 'account_name' => 'Dwi Silvia Anggraini', 'number' => '1420026949999'],
+            ],
+            'NUTRIVA FOODS' => [
+                ['bank' => 'MANDIRI', 'account_name' => 'Dessy Istuning Tiyas', 'number' => '1420026949973'],
+            ],
+            default => [
+                ['bank' => 'MANDIRI', 'account_name' => 'Arif Rakhman Hadi', 'number' => '1420015180150'],
+            ],
+        };
     }
 
     private function invoiceNumberFor(?string $supplier, string $poNumber): string

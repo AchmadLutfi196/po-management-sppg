@@ -133,7 +133,7 @@ class DeliveryNoteController extends Controller
             'prices.*' => ['required', 'numeric', 'min:0'],
             'item_photos' => ['nullable', 'array'],
             'item_photos.*' => ['nullable', 'image', 'max:5120'],
-            'proof_photo' => [$existingDeliveryNote?->proof_photo ? 'nullable' : 'required', 'image', 'max:10240'],
+            'proof_photo' => ['nullable', 'image', 'max:10240'],
         ]);
 
         // Proses upload foto per item
@@ -201,11 +201,13 @@ class DeliveryNoteController extends Controller
         }
 
         $order = $this->findOrderArray($id);
+        $supplierName = collect($order['items'])->pluck('supplier')->filter(fn ($s) => $s !== '-' && filled($s))->first();
 
         return view('surat-jalan.preview', [
             'currentUser' => $this->currentUser(),
             'order' => $order,
             'preparedBy' => $this->deliveryNotePreparedBy($order),
+            'supplier' => $this->supplierDetails($supplierName),
         ]);
     }
 
@@ -258,6 +260,7 @@ class DeliveryNoteController extends Controller
             'currentUser' => $this->currentUser(),
             'order' => $order,
             'preparedBy' => $this->deliveryNotePreparedBy($order),
+            'supplier' => $this->supplierDetails(collect($order['items'])->pluck('supplier')->filter(fn ($s) => $s !== '-' && filled($s))->first()),
         ]);
     }
 

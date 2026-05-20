@@ -198,7 +198,7 @@ test('sppg role sees invoice menu with print but without create or edit controls
         ->assertSeeText($invoice->number);
 });
 
-test('sppg role can see po create shortcut without export action', function (): void {
+test('sppg role can see po create shortcut on po page without export action', function (): void {
     $this->withSession([
         'auth_user' => [
             'role' => 'SPPG',
@@ -207,9 +207,14 @@ test('sppg role can see po create shortcut without export action', function (): 
         ],
     ]);
 
-    $this->get(route('surat-jalan.index'))
+    $this->get(route('purchase-orders.index'))
         ->assertOk()
         ->assertSeeText('PO Baru')
+        ->assertDontSeeText('Ekspor');
+
+    $this->get(route('surat-jalan.index'))
+        ->assertOk()
+        ->assertDontSeeText('PO Baru')
         ->assertDontSeeText('Ekspor');
 });
 

@@ -72,10 +72,16 @@
 
         <main class="mx-auto px-4 py-6 print:p-0">
             <article class="sj-paper mx-auto bg-white p-6 shadow-2xl shadow-slate-300/60 print:shadow-none">
-                {{-- Header: title + nomor --}}
+                {{-- Logo Supplier + Title --}}
                 <div class="flex items-start justify-between border-b-2 border-slate-900 pb-2">
-                    <div class="text-[10px] leading-tight">
-                        <p class="font-bold uppercase">Kepada Yth.</p>
+                    <div class="flex items-center gap-3">
+                        @if (!empty($supplier['logo']))
+                            <img src="{{ asset($supplier['logo']) }}" alt="{{ $supplier['name'] }}" class="h-10 w-10 rounded object-contain">
+                        @endif
+                        <div class="text-[10px] leading-tight">
+                            <p class="text-[12px] font-black uppercase">{{ $supplier['name'] }}</p>
+                            <p class="font-semibold text-slate-600">{{ $supplier['address'] }}</p>
+                        </div>
                     </div>
                     <div class="text-right">
                         <h1 class="text-2xl font-black leading-none tracking-tight">SURAT JALAN</h1>
@@ -85,22 +91,25 @@
                 {{-- Info recipient + dokumen (2 kolom) --}}
                 <div class="mt-2 grid grid-cols-2 gap-6">
                     {{-- Kiri: Data Penerima --}}
-                    <div class="space-y-0.5 text-[11px] leading-snug">
-                        <div class="flex">
-                            <span class="w-16 font-bold">Nama</span>
-                            <span class="font-semibold">: {{ $namaSppg }} ({{ $kdSppg }})</span>
-                        </div>
-                        <div class="flex">
-                            <span class="w-16 font-bold">PJ</span>
-                            <span class="font-semibold">: {{ $receiverName }}</span>
-                        </div>
-                        <div class="flex">
-                            <span class="w-16 font-bold">No. Telp</span>
-                            <span class="font-semibold">: {{ $whatsapp }}</span>
-                        </div>
-                        <div class="flex">
-                            <span class="w-16 font-bold">Alamat</span>
-                            <span class="font-semibold">: {{ $alamatSppg }}</span>
+                    <div>
+                        <p class="mb-1 text-[9px] font-bold uppercase tracking-wide text-slate-500">Kepada Yth.</p>
+                        <div class="space-y-0.5 text-[11px] leading-snug">
+                            <div class="flex">
+                                <span class="w-16 font-bold">Nama</span>
+                                <span class="font-semibold">: {{ $namaSppg }} ({{ $kdSppg }})</span>
+                            </div>
+                            <div class="flex">
+                                <span class="w-16 font-bold">PJ</span>
+                                <span class="font-semibold">: {{ $receiverName }}</span>
+                            </div>
+                            <div class="flex">
+                                <span class="w-16 font-bold">No. Telp</span>
+                                <span class="font-semibold">: {{ $whatsapp }}</span>
+                            </div>
+                            <div class="flex">
+                                <span class="w-16 font-bold">Alamat</span>
+                                <span class="font-semibold">: {{ $alamatSppg }}</span>
+                            </div>
                         </div>
                     </div>
 
@@ -119,9 +128,15 @@
                             <span class="font-semibold">: {{ $formattedDate }}@if ($deliveryTime), {{ $deliveryTime }} @endif</span>
                         </div>
                         <div class="flex">
-                            <span class="w-20 font-bold">Ekspedisi</span>
+                            <span class="w-20 font-bold">Driver</span>
                             <span class="font-semibold">: {{ $driver }}</span>
                         </div>
+                        @if (!empty($delivery['date']))
+                            <div class="flex">
+                                <span class="w-20 font-bold">Tgl Terima</span>
+                                <span class="font-semibold">: {{ \Illuminate\Support\Carbon::parse($delivery['date'])->translatedFormat('d F Y') }}</span>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
@@ -159,12 +174,11 @@
                         <p class="mt-0.5"><span class="font-bold">Supplier:</span> {{ $supplierText }}</p>
                     </div>
                     <div class="border border-slate-700 p-2 leading-snug">
-                        <p class="font-bold">PERHATIAN:</p>
-                        <ol class="mt-0.5 list-inside list-decimal">
-                            <li>Surat Jalan ini merupakan bukti resmi penerimaan barang.</li>
-                            <li>Surat Jalan ini bukan bukti pembayaran/penjualan.</li>
-                            <li>Surat Jalan ini akan dilengkapi Invoice sebagai bukti penjualan.</li>
-                        </ol>
+                        <p class="font-bold">INFORMASI PEMBAYARAN:</p>
+                        <p class="mt-0.5">AN. {{ $supplier['bank_account_name'] }}</p>
+                        @foreach ($supplier['bank_accounts'] as $account)
+                            <p>{{ $account['bank'] }}: {{ $account['number'] }}</p>
+                        @endforeach
                     </div>
                 </div>
 
