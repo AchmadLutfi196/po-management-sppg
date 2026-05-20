@@ -44,7 +44,7 @@
 
         <header class="print:hidden sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white px-8 py-4 shadow-sm">
             <div class="flex items-center gap-5">
-                <a href="{{ route('invoices.index', ['tab' => 'history']) }}" class="text-3xl leading-none text-slate-500 hover:text-slate-900">&times;</a>
+                <a href="{{ route('invoices.index', ['tab' => 'history']) }}" onclick="if (history.length > 1) { event.preventDefault(); history.back(); }" class="text-3xl leading-none text-slate-500 hover:text-slate-900">&times;</a>
                 <h1 class="text-xl font-black tracking-tight text-slate-900">Invoice Preview</h1>
             </div>
             <div class="flex items-center gap-3">

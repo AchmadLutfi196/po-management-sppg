@@ -61,6 +61,16 @@ test('invoice create shows item unit beside quantity and price inputs', function
         ->assertSeeText('Harga per KG');
 });
 
+test('invoice create preview does not open a new tab', function (): void {
+    $order = invoiceBankInfoOrder('VIALA PANGAN');
+
+    $this->get(route('invoices.create', ['id' => $order->id, 'supplier' => 'VIALA PANGAN']))
+        ->assertOk()
+        ->assertSeeText('Preview PDF')
+        ->assertSee('formmethod="GET"', false)
+        ->assertDontSee('formtarget="_blank"', false);
+});
+
 test('invoice history shows item details', function (): void {
     [$order, $invoice] = invoiceStatusFixture('PAID');
     $supplier = Supplier::query()->where('name', 'VIALA PANGAN')->firstOrFail();

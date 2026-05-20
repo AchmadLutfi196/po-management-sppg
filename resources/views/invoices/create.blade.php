@@ -121,7 +121,7 @@
                         <button type="submit" class="w-full rounded-xl bg-slate-800 px-5 py-4 text-sm font-black uppercase tracking-[0.12em] text-white shadow-lg shadow-slate-300 transition hover:bg-blue-600">
                             Simpan & Terbitkan Invoice
                         </button>
-                        <button type="submit" formmethod="GET" formtarget="_blank" formaction="{{ route('invoices.preview', ['id' => $order['id'], 'supplier' => $supplier['name']]) }}" class="flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-4 text-sm font-black uppercase tracking-[0.16em] text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600">
+                        <button type="submit" formmethod="GET" formaction="{{ route('invoices.preview', ['id' => $order['id'], 'supplier' => $supplier['name']]) }}" class="flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-4 text-sm font-black uppercase tracking-[0.16em] text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600">
                             Preview PDF
                         </button>
                     </div>
