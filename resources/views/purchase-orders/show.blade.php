@@ -80,7 +80,7 @@
 
                     <section class="rounded-lg bg-slate-950 p-4 text-white shadow-xl shadow-slate-400/30 sm:p-6">
                         <p class="text-xs font-black uppercase tracking-[0.18em] text-slate-400">$ &nbsp; Total Invoice Keseluruhan</p>
-                        <p class="mt-3 break-words text-xl font-black tracking-tight sm:text-3xl">Rp {{ number_format($invoiceTotal, 0, ',', '.') }}</p>
+                        <p class="mt-3 break-words text-xl font-black tracking-tight sm:text-3xl">Rp {{ number_format($total, 0, ',', '.') }}</p>
                         <div class="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
                             <span class="text-sm font-black uppercase text-slate-400">Jumlah Barang</span>
                             <span class="text-base font-black">{{ count($order['items']) }} Jenis</span>

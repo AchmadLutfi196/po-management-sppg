@@ -8,115 +8,61 @@
             : 0;
     @endphp
 
-    <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/45 p-2 backdrop-blur-sm sm:p-4">
-        <form method="POST" action="{{ route('invoices.store', $order['id']) }}" class="mx-auto max-h-[calc(100vh-1rem)] max-w-[1280px] overflow-y-auto rounded-2xl bg-slate-50 shadow-2xl sm:max-h-[calc(100vh-2rem)] sm:rounded-3xl" data-invoice-form>
+    <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/45 p-3 backdrop-blur-sm sm:p-6">
+        <form method="POST" action="{{ route('invoices.store', $order['id']) }}" class="mx-auto my-0 max-w-[1100px] overflow-hidden rounded-xl bg-slate-50 shadow-2xl sm:rounded-2xl" data-invoice-form>
             @csrf
             <input type="hidden" name="supplier" value="{{ $supplier['name'] }}">
             <input type="hidden" name="invoice_no" value="{{ $invoiceNumber }}">
             <input type="hidden" name="invoice_date" value="{{ now()->format('Y-m-d') }}">
 
-            <header class="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-slate-200 bg-white px-4 py-4 sm:px-8 sm:py-6">
-                <div class="flex min-w-0 items-center gap-3 sm:gap-4">
-                    <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            {{-- Header --}}
+            <header class="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
+                <div class="flex min-w-0 items-center gap-3">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6M9 11h6M9 15h3M5 3h14v18H5z" />
                         </svg>
                     </span>
                     <div class="min-w-0">
-                        <h1 class="truncate text-lg font-black tracking-tight text-slate-950 sm:text-2xl">Rekap Tagihan (Invoice)</h1>
-                        <p class="mt-1 text-xs font-black uppercase tracking-[0.22em] text-slate-400">{{ $supplier['name'] }}</p>
+                        <h1 class="truncate text-base font-black tracking-tight text-slate-950 sm:text-lg">Rekap Tagihan (Invoice)</h1>
+                        <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">{{ $supplier['name'] }} · {{ $invoiceNumber }}</p>
                     </div>
                 </div>
-                <a href="{{ route('invoices.index') }}" class="text-3xl leading-none text-slate-400 hover:text-slate-700">&times;</a>
+                <a href="{{ route('invoices.index') }}" class="text-2xl leading-none text-slate-400 hover:text-slate-700">&times;</a>
             </header>
 
-            <div class="grid grid-cols-1 gap-6 px-4 py-6 sm:px-8 sm:py-10 lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_365px]">
-                <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-md shadow-slate-200/70 sm:p-7">
-                    <h2 class="mb-4 flex items-center gap-3 text-sm font-black uppercase tracking-[0.2em] text-slate-400">
-                        <span class="text-slate-300">▣</span>
-                        Input Harga Per Barang
-                    </h2>
-
-                    <div class="space-y-4">
-                        @forelse ($items as $item)
-                            @php
-                                $itemIndex = $loop->index;
-                                $price = old("items.$itemIndex.price", $item['price'] > 0 ? $item['price'] : '');
-                                $qty = old("items.$itemIndex.qty", $item['qty']);
-                                $unit = strtoupper($item['unit']);
-                            @endphp
-                            <article class="grid grid-cols-1 gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-5 md:grid-cols-[1fr_140px_180px_140px] md:items-center">
-                                <input type="hidden" name="items[{{ $loop->index }}][name]" value="{{ $item['name'] }}">
-                                <input type="hidden" name="items[{{ $loop->index }}][unit]" value="{{ $item['unit'] }}">
-                                <input type="hidden" name="items[{{ $loop->index }}][id]" value="{{ $item['id'] ?? '' }}">
-
-                                <div>
-                                    <p class="text-lg font-black text-slate-950">{{ $item['name'] }}</p>
-                                    <p class="mt-2 text-xs font-black uppercase tracking-wider text-slate-400">Ref: {{ $order['number'] }}</p>
-                                    <p class="mt-1 text-xs font-black uppercase tracking-wider text-slate-400">* {{ number_format($item['qty'], 0, ',', '.') }} {{ strtoupper($item['unit']) }} Total</p>
-                                </div>
-
-                                <label>
-                                    <span class="mb-2 block text-[10px] font-black uppercase tracking-wider text-slate-400">Qty Tagihan ({{ $unit }})</span>
-                                    <div class="flex items-center rounded-lg border border-slate-200 bg-white px-4 py-3 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10">
-                                        <input name="items[{{ $loop->index }}][qty]" type="number" min="0.01" step="0.01" value="{{ $qty }}" class="invoice-qty min-w-0 flex-1 bg-transparent text-sm font-black text-slate-800 outline-none">
-                                        <span class="ml-3 shrink-0 rounded bg-slate-100 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-slate-500">{{ $unit }}</span>
-                                    </div>
-                                </label>
-
-                                <label>
-                                    <span class="mb-2 block text-[10px] font-black uppercase tracking-wider text-slate-400">Harga per {{ $unit }}</span>
-                                    <div class="flex items-center rounded-lg border border-slate-200 bg-white px-4 py-3 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10">
-                                        <span class="mr-2 text-xs font-black text-slate-400">Rp.</span>
-                                        <input name="items[{{ $loop->index }}][price]" type="text" inputmode="numeric" data-currency-input value="{{ $price }}" placeholder="Input Harga" class="invoice-price min-w-0 flex-1 bg-transparent text-sm font-black text-slate-800 outline-none">
-                                    </div>
-                                </label>
-
-                                <div class="text-right">
-                                    <span class="block text-[10px] font-black uppercase tracking-wider text-slate-400">Subtotal</span>
-                                    <p class="mt-3 text-lg font-black text-slate-950">Rp <span class="invoice-subtotal">0</span></p>
-                                </div>
-                            </article>
-                        @empty
-                            <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-10 text-center text-sm font-bold text-slate-400">
-                                Tidak ada item yang siap dibuat invoice untuk supplier ini.
-                            </div>
-                        @endforelse
+            <div class="space-y-4 px-4 py-4 sm:px-6 sm:py-5">
+                {{-- Top: Ringkasan + Rekening (horizontal) --}}
+                <div class="grid grid-cols-1 gap-3 lg:grid-cols-12">
+                    <div class="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm lg:col-span-4">
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Total Item</p>
+                            <p class="mt-0.5 text-sm font-black text-slate-950" data-invoice-item-count>{{ $items->count() }} Barang</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Total Tagihan</p>
+                            <p class="mt-0.5 text-lg font-black text-blue-600">Rp <span data-invoice-total>{{ number_format($total, 0, ',', '.') }}</span></p>
+                        </div>
                     </div>
-                </section>
-
-                <aside class="h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-md shadow-slate-200/70 sm:p-7">
-                    <h2 class="mb-8 flex items-center gap-3 text-sm font-black uppercase tracking-[0.2em] text-slate-400">
-                        <span class="text-slate-300">▭</span>
-                        Ringkasan Pembayaran
-                    </h2>
-
-                    <div class="space-y-6">
-                        <div class="flex items-center justify-between border-b border-slate-100 pb-5">
-                            <span class="text-sm font-bold text-slate-500">Total Item</span>
-                            <span class="text-sm font-black text-slate-950">{{ $items->count() }} Barang</span>
+                    <div class="rounded-xl border border-blue-100 bg-blue-50 p-4 lg:col-span-5">
+                        <p class="text-[10px] font-bold uppercase tracking-wide text-blue-600">Informasi Rekening — AN. {{ $supplier['bank_account_name'] }}</p>
+                        <div class="mt-1.5 flex flex-wrap gap-x-4 gap-y-0.5">
+                            @foreach ($supplier['bank_accounts'] as $account)
+                                <p class="text-[11px] font-bold text-blue-700">{{ $account['bank'] }}: {{ $account['number'] }}</p>
+                            @endforeach
                         </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm font-bold text-slate-500">Total Tagihan</span>
-                            <span class="text-2xl font-black text-blue-600">Rp <span data-invoice-total>{{ number_format($total, 0, ',', '.') }}</span></span>
-                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2 lg:col-span-3">
+                        <button type="submit" class="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white shadow-sm transition hover:bg-blue-600">Simpan & Terbitkan</button>
+                        <button type="submit" formmethod="GET" formtarget="_blank" formaction="{{ route('invoices.preview', ['id' => $order['id'], 'supplier' => $supplier['name']]) }}" class="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-wide text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600">Preview PDF</button>
+                    </div>
+                </div>
 
-                        <div class="rounded-2xl border border-blue-100 bg-blue-50 p-5">
-                            <p class="text-xs font-black uppercase tracking-[0.18em] text-blue-600">Informasi Rekening</p>
-                            <p class="mt-4 text-xs font-black uppercase text-blue-600">Transfer Bank</p>
-                            <p class="mt-1 text-xs font-black uppercase text-blue-600">AN. {{ $supplier['bank_account_name'] }}</p>
-                            <div class="mt-3 space-y-1.5">
-                                @foreach ($supplier['bank_accounts'] as $account)
-                                    <p class="text-xs font-black uppercase text-blue-600">{{ $account['bank'] }}: {{ $account['number'] }}</p>
-                                @endforeach
-                            </div>
-                        </div>
-
-                        @if ($errors->any())
-                            <div class="rounded-xl border border-rose-100 bg-rose-50 p-4 text-xs font-bold text-rose-600">
-                                Lengkapi harga setiap barang sebelum menerbitkan invoice.
-                            </div>
-                        @endif
+                @if ($errors->any())
+                    <div class="rounded-lg border border-rose-100 bg-rose-50 px-4 py-2 text-xs font-bold text-rose-600">
+                        Lengkapi harga setiap barang sebelum menerbitkan invoice.
+                    </div>
+                @endif
 
                         <button type="submit" class="w-full rounded-xl bg-slate-800 px-5 py-4 text-sm font-black uppercase tracking-[0.12em] text-white shadow-lg shadow-slate-300 transition hover:bg-blue-600">
                             Simpan & Terbitkan Invoice
@@ -125,41 +71,132 @@
                             Preview PDF
                         </button>
                     </div>
-                </aside>
+
+                    {{-- Datalist autocomplete --}}
+                    <datalist id="invoice-stock-items-list">
+                        @foreach ($stockItems as $stock)
+                            <option value="{{ $stock['name'] }}" data-unit="{{ $stock['unit'] ?? 'KG' }}"></option>
+                        @endforeach
+                    </datalist>
+                </section>
             </div>
+
+            <footer class="flex items-center justify-between border-t border-slate-200 bg-white px-4 py-2.5 text-[10px] font-bold uppercase tracking-wide text-slate-400 sm:px-6">
+                <span>Ref PO: {{ $order['number'] }}</span>
+                <span>{{ now()->format('Y-m-d') }}</span>
+            </footer>
         </form>
     </div>
 
     <script>
         (() => {
             const form = document.querySelector('[data-invoice-form]');
+            if (!form) return;
 
-            if (!form) {
-                return;
-            }
+            const tbody = document.getElementById('invoice-items-tbody');
+            const addBtn = document.getElementById('add-invoice-item-btn');
+            const emptyState = document.getElementById('invoice-empty-state');
+            const itemsCountLabel = document.getElementById('invoice-items-count');
+            let itemIndex = {{ $items->count() }};
 
             const onlyDigits = (value) => String(value).replace(/[^\d]/g, '');
             const formatNumber = (value) => new Intl.NumberFormat('id-ID').format(value);
 
+            // Stock items map for autocomplete unit fill
+            const stockItemsByName = {};
+            @foreach ($stockItems as $stock)
+                stockItemsByName['{{ strtoupper($stock['name']) }}'] = '{{ $stock['unit'] ?? 'KG' }}';
+            @endforeach
+
             const refreshTotals = () => {
                 let total = 0;
+                const rows = tbody.querySelectorAll('.invoice-item-row');
+                if (itemsCountLabel) itemsCountLabel.textContent = rows.length;
 
-                form.querySelectorAll('article').forEach((row) => {
+                rows.forEach((row, index) => {
+                    // Update row number
+                    const numCell = row.querySelector('td:first-child');
+                    if (numCell) numCell.textContent = index + 1;
+
                     const qty = Number(row.querySelector('.invoice-qty')?.value || 0);
                     const price = Number(onlyDigits(row.querySelector('.invoice-price')?.value || 0));
                     const subtotal = qty * price;
-                    const subtotalTarget = row.querySelector('.invoice-subtotal');
-
-                    if (subtotalTarget) {
-                        subtotalTarget.textContent = formatNumber(subtotal);
-                    }
-
+                    const subtotalEl = row.querySelector('.invoice-subtotal');
+                    if (subtotalEl) subtotalEl.textContent = formatNumber(subtotal);
                     total += subtotal;
                 });
 
-                form.querySelector('[data-invoice-total]').textContent = formatNumber(total);
+                const totalEl = form.querySelector('[data-invoice-total]');
+                if (totalEl) totalEl.textContent = formatNumber(total);
+
+                const countEl = form.querySelector('[data-invoice-item-count]');
+                if (countEl) countEl.textContent = rows.length + ' Barang';
             };
 
+            const buildNewRow = (idx) => {
+                return `<tr class="invoice-item-row hover:bg-blue-50/30">
+                    <td class="px-3 py-2 text-xs font-bold text-slate-400"></td>
+                    <td class="px-3 py-2">
+                        <input type="hidden" name="items[${idx}][id]" value="">
+                        <input type="text" name="items[${idx}][name]" list="invoice-stock-items-list" autocomplete="off" placeholder="Ketik / pilih barang..." required class="invoice-item-name w-full min-w-[160px] rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs font-semibold text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10">
+                    </td>
+                    <td class="px-2 py-2">
+                        <input type="text" name="items[${idx}][unit]" value="KG" required class="item-unit-hidden w-full rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs font-semibold uppercase text-slate-800 outline-none focus:border-blue-500">
+                    </td>
+                    <td class="px-2 py-2">
+                        <input name="items[${idx}][qty]" type="number" min="0.01" step="0.01" value="1" required class="invoice-qty w-full rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs font-semibold text-slate-800 outline-none">
+                    </td>
+                    <td class="px-2 py-2">
+                        <div class="flex items-center rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5">
+                            <span class="mr-1 text-[9px] font-bold text-slate-400">Rp</span>
+                            <input name="items[${idx}][price]" type="text" inputmode="numeric" value="0" placeholder="0" required class="invoice-price min-w-0 flex-1 bg-transparent text-xs font-semibold text-slate-800 outline-none">
+                        </div>
+                    </td>
+                    <td class="px-2 py-2 text-right text-xs font-bold text-slate-900">Rp <span class="invoice-subtotal">0</span></td>
+                    <td class="px-2 py-2 text-center">
+                        <button type="button" class="remove-invoice-item rounded p-1 text-slate-300 transition-colors hover:bg-red-50 hover:text-red-500" title="Hapus">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        </button>
+                    </td>
+                </tr>`;
+            };
+
+            if (addBtn) {
+                addBtn.addEventListener('click', () => {
+                    if (emptyState) emptyState.remove();
+                    tbody.insertAdjacentHTML('beforeend', buildNewRow(itemIndex));
+                    itemIndex++;
+                    const newRow = tbody.lastElementChild;
+                    newRow.querySelectorAll('.invoice-qty, .invoice-price').forEach(input => {
+                        input.addEventListener('input', refreshTotals);
+                    });
+                    refreshTotals();
+                });
+            }
+
+            // Remove item
+            tbody.addEventListener('click', (e) => {
+                const removeBtn = e.target.closest('.remove-invoice-item');
+                if (removeBtn) {
+                    removeBtn.closest('.invoice-item-row').remove();
+                    refreshTotals();
+                }
+            });
+
+            // Autocomplete unit
+            tbody.addEventListener('input', (e) => {
+                if (e.target.classList.contains('invoice-item-name')) {
+                    const typed = String(e.target.value || '').trim().toUpperCase();
+                    const matchedUnit = stockItemsByName[typed];
+                    if (matchedUnit) {
+                        const row = e.target.closest('.invoice-item-row');
+                        const unitInput = row.querySelector('.item-unit-hidden');
+                        if (unitInput) unitInput.value = matchedUnit;
+                    }
+                }
+            });
+
+            // Initial listeners
             form.querySelectorAll('.invoice-qty, .invoice-price').forEach((input) => {
                 input.addEventListener('input', refreshTotals);
             });

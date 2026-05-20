@@ -57,8 +57,8 @@ test('invoice create shows item unit beside quantity and price inputs', function
 
     $this->get(route('invoices.create', ['id' => $order->id, 'supplier' => $supplier->name]))
         ->assertOk()
-        ->assertSeeText('Qty Tagihan (KG)')
-        ->assertSeeText('Harga per KG');
+        ->assertSee('value="KG"', false)
+        ->assertSee('value="12"', false);
 });
 
 test('invoice create preview does not open a new tab', function (): void {
@@ -151,9 +151,11 @@ test('invoice history can be searched and filtered', function (): void {
         ->assertDontSeeText('BAWANG MERAH');
 });
 
-test('creating invoice syncs item quantity and price back to purchase order', function (): void {
+test('creating invoice does not change purchase order item quantity or price', function (): void {
     $order = invoiceBankInfoOrder('VIALA PANGAN');
     $item = $order->items()->firstOrFail();
+    $originalQty = (float) $item->qty;
+    $originalPrice = $item->price;
 
     $this->post(route('invoices.store', $order->id), [
         'supplier' => 'VIALA PANGAN',
@@ -172,10 +174,10 @@ test('creating invoice syncs item quantity and price back to purchase order', fu
 
     $item->refresh();
 
-    expect((float) $item->qty)->toBe(200.0)
-        ->and($item->price)->toBe(20000)
-        ->and($item->is_invoiced)->toBeTrue()
-        ->and($order->refresh()->total_amount)->toBe(4000000);
+    // Qty & price di PO tetap original, hanya invoice yang menyimpan perubahan
+    expect((float) $item->qty)->toBe($originalQty)
+        ->and($item->price)->toBe($originalPrice)
+        ->and($item->is_invoiced)->toBeTrue();
 });
 
 test('invoice create shows supplier bank accounts', function (string $supplierName, array $expectedTexts): void {

@@ -139,11 +139,15 @@
 
                         <label class="space-y-1">
                             <span class="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">Status</span>
-                            <select name="status" class="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-bold text-slate-600 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10">
-                                <option value="all" @selected(($filters['status'] ?? 'all') === 'all')>Semua</option>
-                                <option value="PAID" @selected(($filters['status'] ?? 'all') === 'PAID')>Lunas</option>
-                                <option value="UNPAID" @selected(($filters['status'] ?? 'all') === 'UNPAID')>Belum Bayar</option>
-                            </select>
+                            @if ($currentUser['role'] === 'ADMIN')
+                                <select name="status" class="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-bold text-slate-600 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10">
+                                    <option value="all" @selected(($filters['status'] ?? 'all') === 'all')>Semua</option>
+                                    <option value="PAID" @selected(($filters['status'] ?? 'all') === 'PAID')>Lunas</option>
+                                    <option value="UNPAID" @selected(($filters['status'] ?? 'all') === 'UNPAID')>Belum Bayar</option>
+                                </select>
+                            @else
+                                <p class="flex h-10 items-center rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-bold text-slate-600">Semua</p>
+                            @endif
                         </label>
 
                         <label class="space-y-1">
@@ -243,7 +247,7 @@
                                         @endif
                                     </td>
                                     <td class="px-3 py-3 text-right">
-                                        <a href="{{ route('invoices.preview', ['id' => $entry['order']['id'], 'invoice' => $invoice['number'], 'supplier' => $invoice['supplier']]) }}" class="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-700 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600">
+                                        <a href="{{ route('invoices.preview', ['id' => $entry['order']['id'], 'invoice' => $invoice['number'], 'supplier' => $invoice['supplier']]) }}" class="inline-flex items-center rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-700 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600">
                                             Cetak
                                         </a>
                                     </td>

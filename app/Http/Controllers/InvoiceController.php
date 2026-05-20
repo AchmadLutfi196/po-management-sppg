@@ -187,6 +187,7 @@ class InvoiceController extends Controller
             'currentUser' => $this->currentUser(),
             'order' => $this->orderToArray($order),
             'items' => $items,
+            'stockItems' => $this->stockItems(),
             'invoiceNumber' => $this->invoiceNumberFor($supplierName, $order->number),
             'supplier' => $this->supplierDetails($supplierName),
         ]);
@@ -238,11 +239,18 @@ class InvoiceController extends Controller
                 ]);
 
                 if (! empty($itemData['id'])) {
-                    PurchaseOrderItem::query()->whereKey($itemData['id'])->update([
-                        'qty' => $itemData['qty'],
-                        'price' => $itemData['price'],
-                        'is_invoiced' => true,
-                    ]);
+                    $poItem = PurchaseOrderItem::query()->find($itemData['id']);
+                    if ($poItem) {
+                        // Update harga di PO hanya jika masih 0 (belum ditentukan)
+                        $updateData = ['is_invoiced' => true];
+                        if ((int) $poItem->price === 0) {
+                            $updateData['price'] = $itemData['price'];
+                        }
+                        if ((float) $poItem->qty === 0.0) {
+                            $updateData['qty'] = $itemData['qty'];
+                        }
+                        $poItem->update($updateData);
+                    }
                 }
             }
 
@@ -266,6 +274,46 @@ class InvoiceController extends Controller
             'currentUser' => $this->currentUser(),
             'order' => $this->findOrderArray($id),
         ]);
+    }
+
+    public function addItem(Request $request, string $id): RedirectResponse
+    {
+        if ($redirect = $this->requireAuth()) {
+            return $redirect;
+        }
+
+        $this->authorizeAdmin();
+
+        $validated = $request->validate([
+            'invoice_number' => ['required', 'string', 'exists:invoices,number'],
+            'name' => ['required', 'string', 'max:120'],
+            'unit' => ['required', 'string', 'max:20'],
+            'qty' => ['required', 'numeric', 'min:0.01'],
+            'price' => ['required', 'numeric', 'min:1'],
+        ]);
+
+        $order = $this->findOrderModel($id);
+        $invoice = Invoice::query()
+            ->where('purchase_order_id', $order->id)
+            ->where('number', $validated['invoice_number'])
+            ->firstOrFail();
+
+        $subtotal = (int) ($validated['qty'] * $validated['price']);
+
+        $invoice->items()->create([
+            'purchase_order_item_id' => null,
+            'name' => $validated['name'],
+            'qty' => $validated['qty'],
+            'unit' => $validated['unit'],
+            'price' => $validated['price'],
+            'subtotal' => $subtotal,
+        ]);
+
+        $invoice->update([
+            'total_amount' => $invoice->items()->sum('subtotal'),
+        ]);
+
+        return back()->with('success', 'Barang berhasil ditambahkan ke invoice.');
     }
 
     public function updateStatus(Request $request, string $id): RedirectResponse

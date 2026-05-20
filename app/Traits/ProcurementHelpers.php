@@ -320,6 +320,7 @@ trait ProcurementHelpers
             'status' => $invoice->status,
             'total_amount' => $invoice->total_amount,
             'items' => $invoice->items->map(fn ($item): array => [
+                'purchase_order_item_id' => $item->purchase_order_item_id,
                 'name' => $item->name,
                 'qty' => (float) $item->qty,
                 'unit' => $item->unit,
