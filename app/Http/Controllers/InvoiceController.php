@@ -257,15 +257,11 @@ class InvoiceController extends Controller
                 if (! empty($itemData['id'])) {
                     $poItem = PurchaseOrderItem::query()->find($itemData['id']);
                     if ($poItem) {
-                        // Update harga di PO hanya jika masih 0 (belum ditentukan)
-                        $updateData = ['is_invoiced' => true];
-                        if ((int) $poItem->price === 0) {
-                            $updateData['price'] = $itemData['price'];
-                        }
-                        if ((float) $poItem->qty === 0.0) {
-                            $updateData['qty'] = $itemData['qty'];
-                        }
-                        $poItem->update($updateData);
+                        $poItem->update([
+                            'is_invoiced' => true,
+                            'price' => $itemData['price'],
+                            'qty' => $itemData['qty'],
+                        ]);
                     }
                 }
             }

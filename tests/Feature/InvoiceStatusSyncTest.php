@@ -170,7 +170,7 @@ test('invoice history can be searched and filtered', function (): void {
         ->assertDontSeeText('BAWANG MERAH');
 });
 
-test('creating invoice does not change purchase order item quantity or price', function (): void {
+test('creating invoice updates purchase order item quantity and price', function (): void {
     $order = invoiceBankInfoOrder('VIALA PANGAN');
     $item = $order->items()->firstOrFail();
     $originalQty = (float) $item->qty;
@@ -193,9 +193,9 @@ test('creating invoice does not change purchase order item quantity or price', f
 
     $item->refresh();
 
-    // Qty & price di PO tetap original, hanya invoice yang menyimpan perubahan
-    expect((float) $item->qty)->toBe($originalQty)
-        ->and($item->price)->toBe($originalPrice)
+    // Qty & price di PO juga diupdate mengikuti invoice jika item berasal dari PO
+    expect((float) $item->qty)->toBe(200.0)
+        ->and($item->price)->toBe(20000)
         ->and($item->is_invoiced)->toBeTrue();
 });
 
