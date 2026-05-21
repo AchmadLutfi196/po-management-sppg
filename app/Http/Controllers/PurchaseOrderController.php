@@ -222,6 +222,37 @@ class PurchaseOrderController extends Controller
                 $invoice->update(['total_amount' => $invoice->items()->sum('subtotal')]);
             }
 
+            // Update qty/unit/price item invoiced yang masih ada di form
+            $remainingInvoicedItems = $order->items()->where('is_invoiced', true)->get();
+            foreach ($remainingInvoicedItems as $invoicedItem) {
+                // Cari data terbaru dari form berdasarkan nama
+                $formItem = collect($validated['items'])->first(fn ($i) => strtoupper($i['name'] ?? '') === strtoupper($invoicedItem->name));
+                if ($formItem) {
+                    $invoicedItem->update([
+                        'qty' => $formItem['qty'],
+                        'unit' => strtoupper($formItem['unit'] ?? $invoicedItem->unit),
+                        'price' => $formItem['price'],
+                    ]);
+
+                    // Sync ke invoice items juga
+                    $invoiceItem = \App\Models\InvoiceItem::where('purchase_order_item_id', $invoicedItem->id)->first();
+                    if ($invoiceItem) {
+                        $subtotal = (int) ($formItem['qty'] * $formItem['price']);
+                        $invoiceItem->update([
+                            'qty' => $formItem['qty'],
+                            'unit' => strtoupper($formItem['unit'] ?? $invoiceItem->unit),
+                            'price' => $formItem['price'],
+                            'subtotal' => $subtotal,
+                        ]);
+                    }
+                }
+            }
+
+            // Recalculate total invoice
+            foreach ($order->invoices as $invoice) {
+                $invoice->update(['total_amount' => $invoice->items()->sum('subtotal')]);
+            }
+
             // Hapus item yang belum di-invoice
             $order->items()->where('is_invoiced', false)->delete();
 
