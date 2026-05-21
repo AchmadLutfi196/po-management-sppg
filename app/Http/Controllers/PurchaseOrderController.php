@@ -33,7 +33,7 @@ class PurchaseOrderController extends Controller
         if ($hasQueryParams) {
             $filters = [
                 'search' => $request->string('search')->toString(),
-                'status' => $request->string('status')->toString(),
+                'status' => $request->string('status')->toString() ?: 'ALL',
                 'po_date' => $request->string('po_date')->toString(),
                 'drop_date' => $request->string('drop_date')->toString(),
                 'page' => $request->string('page')->toString(),
@@ -48,10 +48,8 @@ class PurchaseOrderController extends Controller
         $query = $this->visibleOrdersQuery();
         $search = strtolower($request->string('search')->toString());
         $status = $request->string('status')->toString();
-        $dateFrom = $request->string('date_from')->toString();
-        $dateTo = $request->string('date_to')->toString();
-        $dropFrom = $request->string('drop_from')->toString();
-        $dropTo = $request->string('drop_to')->toString();
+        $poDate = $request->string('po_date')->toString();
+        $dropDate = $request->string('drop_date')->toString();
 
         if ($search !== '') {
             $query->where(function (Builder $builder) use ($search): void {
@@ -67,20 +65,12 @@ class PurchaseOrderController extends Controller
             $query->where('status', $status);
         }
 
-        if ($dateFrom !== '') {
-            $query->whereDate('date', '>=', $dateFrom);
+        if ($poDate !== '') {
+            $query->whereDate('date', $poDate);
         }
 
-        if ($dateTo !== '') {
-            $query->whereDate('date', '<=', $dateTo);
-        }
-
-        if ($dropFrom !== '') {
-            $query->whereDate('droping_date', '>=', $dropFrom);
-        }
-
-        if ($dropTo !== '') {
-            $query->whereDate('droping_date', '<=', $dropTo);
+        if ($dropDate !== '') {
+            $query->whereDate('droping_date', $dropDate);
         }
 
         $orders = $query
@@ -96,10 +86,8 @@ class PurchaseOrderController extends Controller
             'filters' => [
                 'search' => $request->string('search')->toString(),
                 'status' => $status ?: 'ALL',
-                'date_from' => $dateFrom,
-                'date_to' => $dateTo,
-                'drop_from' => $dropFrom,
-                'drop_to' => $dropTo,
+                'po_date' => $poDate,
+                'drop_date' => $dropDate,
             ],
         ]);
     }
