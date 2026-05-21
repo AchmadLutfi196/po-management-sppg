@@ -198,10 +198,34 @@ class PurchaseOrderController extends Controller
                 'droping_time' => $validated['droping_time'] ?? null,
             ]);
 
+            // Identifikasi item yang dihapus user dari form
+            $submittedNames = collect($validated['items'])
+                ->pluck('name')
+                ->filter()
+                ->map(fn ($n) => strtoupper($n))
+                ->all();
+
+            // Hapus item invoiced yang tidak ada di form (user sengaja hapus)
+            $invoicedItemsToRemove = $order->items()
+                ->where('is_invoiced', true)
+                ->get()
+                ->filter(fn ($item) => ! in_array(strtoupper($item->name), $submittedNames, true));
+
+            foreach ($invoicedItemsToRemove as $removedItem) {
+                // Hapus dari invoice items juga
+                \App\Models\InvoiceItem::where('purchase_order_item_id', $removedItem->id)->delete();
+                $removedItem->delete();
+            }
+
+            // Update total invoice setelah item dihapus
+            foreach ($order->invoices as $invoice) {
+                $invoice->update(['total_amount' => $invoice->items()->sum('subtotal')]);
+            }
+
             // Hapus item yang belum di-invoice
             $order->items()->where('is_invoiced', false)->delete();
 
-            // Buat ulang dari form — skip item yang namanya sama dengan yang sudah invoiced
+            // Buat ulang dari form — skip item yang namanya sama dengan yang masih invoiced
             $invoicedNames = $order->items()->where('is_invoiced', true)->pluck('name')->map(fn ($n) => strtoupper($n))->all();
             $newItems = collect($validated['items'])->filter(function ($item) use ($invoicedNames) {
                 $name = strtoupper($item['name'] ?? '');
