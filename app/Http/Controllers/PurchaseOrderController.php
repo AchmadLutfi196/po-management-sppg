@@ -146,6 +146,8 @@ class PurchaseOrderController extends Controller
             return $order;
         });
 
+        session()->forget('po_filters');
+
         return redirect()->route('purchase-orders.index')->with('success', 'PO berhasil dibuat.');
     }
 
@@ -211,6 +213,8 @@ class PurchaseOrderController extends Controller
             $this->syncPurchaseOrderItems($order, $validated['items']);
             $this->publishOrResplitPurchaseOrder($order->refresh());
         });
+
+        session()->forget('po_filters');
 
         return redirect()->route('purchase-orders.index')->with('success', 'PO berhasil diperbarui.');
     }
@@ -306,6 +310,8 @@ class PurchaseOrderController extends Controller
 
         $this->authorizeAdmin();
         $this->findOrderModel($id)->delete();
+
+        session()->forget('po_filters');
 
         return redirect()->route('purchase-orders.index')->with('success', 'PO berhasil dihapus.');
     }
