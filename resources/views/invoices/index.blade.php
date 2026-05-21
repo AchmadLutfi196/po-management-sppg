@@ -256,13 +256,14 @@
                         <thead class="bg-slate-50/80">
                             <tr>
                                 <th class="w-[3%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">No</th>
-                                <th class="w-[19%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">No Invoice</th>
-                                <th class="w-[17%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Supplier</th>
-                                <th class="w-[9%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Kepada</th>
-                                <th class="w-[9%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Info Drop</th>
+                                <th class="w-[17%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">No Invoice</th>
+                                <th class="w-[14%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Supplier</th>
+                                <th class="w-[8%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Kepada</th>
+                                <th class="w-[8%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Tgl PO</th>
+                                <th class="w-[8%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Info Drop</th>
                                 <th class="w-[16%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Rincian Barang</th>
                                 <th class="w-[10%] px-3 py-2.5 text-right text-[10px] font-bold uppercase tracking-wide text-slate-400">Total</th>
-                                <th class="w-[12%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Status</th>
+                                <th class="w-[11%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Status</th>
                                 <th class="w-[5%] px-3 py-2.5 text-right text-[10px] font-bold uppercase tracking-wide text-slate-400">Aksi</th>
                             </tr>
                         </thead>
@@ -278,6 +279,7 @@
                                     </td>
                                     <td class="px-3 py-3 text-xs font-bold uppercase text-slate-800">{{ $invoice['supplier'] }}</td>
                                     <td class="px-3 py-3 text-xs font-bold uppercase text-slate-500">{{ $entry['order']['sppg'] }}</td>
+                                    <td class="px-3 py-3 text-xs font-bold text-slate-700">{{ date('d/m/Y', strtotime($entry['order']['date'])) }}</td>
                                     <td class="px-3 py-3 text-xs font-bold text-slate-700">
                                         @if(!empty($entry['order']['droping_date']))
                                             <span class="block">{{ date('d/m/Y', strtotime($entry['order']['droping_date'])) }}</span>
