@@ -86,8 +86,7 @@
                                 <th class="w-[32%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Supplier & Referensi</th>
                                 <th class="w-[16%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Info Item</th>
                                 <th class="w-[18%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Rincian Barang</th>
-                                <th class="w-[10%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Tanggal PO</th>
-                                <th class="w-[10%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Tanggal Drop</th>
+                                <th class="w-[12%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Tanggal</th>
                                 <th class="w-[10%] px-3 py-2.5 text-right text-[10px] font-bold uppercase tracking-wide text-slate-400">Aksi</th>
                             </tr>
                         </thead>
@@ -118,12 +117,8 @@
                                     </td>
                                     <td class="px-3 py-3 text-xs font-bold text-slate-700">
                                         {{ date('d/m/Y', strtotime($entry['order']['date'])) }}
-                                    </td>
-                                    <td class="px-3 py-3 text-xs font-bold text-slate-700">
-                                        @if(!empty($entry['order']['droping_date']))
-                                            {{ date('d/m/Y', strtotime($entry['order']['droping_date'])) }}
-                                        @else
-                                            <span class="text-slate-400">-</span>
+                                        @if(!empty($entry['order']['droping_time']))
+                                            <span class="block text-[10px] text-slate-400">{{ $entry['order']['droping_time'] }}</span>
                                         @endif
                                     </td>
                                     <td class="px-3 py-3 text-right">
@@ -135,7 +130,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="px-3 py-10 text-center text-sm font-bold text-slate-400">Belum ada tagihan yang siap direkap.</td>
+                                    <td colspan="6" class="px-3 py-10 text-center text-sm font-bold text-slate-400">Belum ada tagihan yang siap direkap.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -259,8 +254,7 @@
                                 <th class="w-[17%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">No Invoice</th>
                                 <th class="w-[14%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Supplier</th>
                                 <th class="w-[8%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Kepada</th>
-                                <th class="w-[8%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Tgl PO</th>
-                                <th class="w-[8%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Info Drop</th>
+                                <th class="w-[10%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Tanggal</th>
                                 <th class="w-[16%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Rincian Barang</th>
                                 <th class="w-[10%] px-3 py-2.5 text-right text-[10px] font-bold uppercase tracking-wide text-slate-400">Total</th>
                                 <th class="w-[11%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Status</th>
@@ -279,15 +273,10 @@
                                     </td>
                                     <td class="px-3 py-3 text-xs font-bold uppercase text-slate-800">{{ $invoice['supplier'] }}</td>
                                     <td class="px-3 py-3 text-xs font-bold uppercase text-slate-500">{{ $entry['order']['sppg'] }}</td>
-                                    <td class="px-3 py-3 text-xs font-bold text-slate-700">{{ date('d/m/Y', strtotime($entry['order']['date'])) }}</td>
                                     <td class="px-3 py-3 text-xs font-bold text-slate-700">
-                                        @if(!empty($entry['order']['droping_date']))
-                                            <span class="block">{{ date('d/m/Y', strtotime($entry['order']['droping_date'])) }}</span>
-                                            @if(!empty($entry['order']['droping_time']))
-                                                <span class="block text-[10px] text-slate-400">{{ $entry['order']['droping_time'] }}</span>
-                                            @endif
-                                        @else
-                                            <span class="text-slate-400">-</span>
+                                        {{ date('d/m/Y', strtotime($entry['order']['date'])) }}
+                                        @if(!empty($entry['order']['droping_time']))
+                                            <span class="block text-[10px] text-slate-400">{{ $entry['order']['droping_time'] }}</span>
                                         @endif
                                     </td>
                                     <td class="px-3 py-3">
