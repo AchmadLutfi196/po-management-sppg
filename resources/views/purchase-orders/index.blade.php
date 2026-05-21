@@ -56,18 +56,43 @@
             </article>
         </div>
 
-        <form method="GET" class="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-md shadow-slate-200/70 sm:p-5 lg:flex-row lg:flex-wrap lg:items-end">
-            <div class="relative min-w-0 flex-1">
-                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-lg text-slate-400">⌕</span>
-                <input name="search" value="{{ $filters['search'] ?? '' }}" type="search" placeholder="Cari berdasarkan No PO, barang, atau nama pembuat..." class="w-full rounded-lg border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm font-semibold text-slate-600 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10">
-            </div>
-            <div class="relative w-full lg:w-44">
-                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">▽</span>
-                <select name="status" class="w-full appearance-none rounded-lg border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-xs font-black uppercase tracking-wider text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" onchange="this.form.submit()">
-                    @foreach (['ALL' => 'Semua Status', 'VALID' => 'Valid', 'PROCESSING' => 'Proses', 'INVOICED' => 'Tertagih', 'COMPLETED' => 'Selesai', 'CANCELLED' => 'Dibatalkan'] as $value => $label)
-                        <option value="{{ $value }}" @selected(($filters['status'] ?? 'ALL') === $value)>{{ $label }}</option>
-                    @endforeach
-                </select>
+        <form method="GET" class="rounded-xl border border-slate-200 bg-white p-3.5 shadow-md shadow-slate-200/70">
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-end">
+                {{-- Cari --}}
+                <div class="relative min-w-0 flex-1 w-full">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-lg text-slate-400">⌕</span>
+                    <input name="search" value="{{ $filters['search'] ?? '' }}" type="search" placeholder="Cari berdasarkan No PO, barang, atau nama pembuat..." class="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 pl-11 pr-4 text-xs font-semibold text-slate-600 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10">
+                </div>
+
+                {{-- Status --}}
+                <div class="relative w-full lg:w-44">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">▽</span>
+                    <select name="status" class="h-10 w-full appearance-none rounded-lg border border-slate-200 bg-slate-50 pl-11 pr-4 text-[10px] font-black uppercase tracking-wider text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" onchange="this.form.submit()">
+                        @foreach (['ALL' => 'Semua Status', 'VALID' => 'Valid', 'PROCESSING' => 'Proses', 'INVOICED' => 'Tertagih', 'COMPLETED' => 'Selesai', 'CANCELLED' => 'Dibatalkan'] as $value => $label)
+                            <option value="{{ $value }}" @selected(($filters['status'] ?? 'ALL') === $value)>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Tanggal PO --}}
+                <div class="w-full lg:w-44">
+                    <span class="mb-1 block text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">Tanggal PO</span>
+                    <input type="date" name="po_date" value="{{ $filters['po_date'] ?? '' }}" class="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-600 outline-none transition focus:border-blue-500 focus:bg-white" onchange="this.form.submit()">
+                </div>
+
+                {{-- Tanggal Dropping --}}
+                <div class="w-full lg:w-44">
+                    <span class="mb-1 block text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">Tanggal Dropping</span>
+                    <input type="date" name="drop_date" value="{{ $filters['drop_date'] ?? '' }}" class="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-600 outline-none transition focus:border-blue-500 focus:bg-white" onchange="this.form.submit()">
+                </div>
+
+                {{-- Buttons --}}
+                <div class="flex w-full lg:w-auto gap-2">
+                    <button type="submit" class="h-10 flex-1 lg:flex-none rounded-lg bg-blue-600 px-5 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-blue-600/20 hover:bg-blue-700 transition">Filter</button>
+                    @if(!empty($filters['search']) || ($filters['status'] !== 'ALL') || !empty($filters['po_date']) || !empty($filters['drop_date']))
+                        <a href="{{ route('purchase-orders.index', ['clear' => 1]) }}" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-xs font-black uppercase tracking-wide text-slate-500 transition hover:bg-slate-50" title="Reset">✕</a>
+                    @endif
+                </div>
             </div>
             <div class="flex items-end gap-2">
                 <label class="block">

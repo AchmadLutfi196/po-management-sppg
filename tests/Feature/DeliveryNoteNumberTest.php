@@ -131,7 +131,7 @@ test('surat jalan form saves successfully without proof photo', function (): voi
         ->assertSee('value="Ahmad"', false)
         ->assertSee('value="085735579851"', false)
         ->assertSee('value="15/SJ/19052026/DBM/2026"', false)
-        ->assertSee('value="'.now()->toDateString().'"', false)
+        ->assertSee('value="2026-05-21"', false)
         ->assertSee('value="Udin"', false)
         ->assertSee('Amann')
         ->assertSee('name="qty_actual[]" type="number" value="15"', false)

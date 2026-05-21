@@ -22,6 +22,35 @@ class DeliveryNoteController extends Controller
             return $redirect;
         }
 
+        if ($request->has('clear')) {
+            $request->session()->forget('sj_filters');
+
+            return redirect()->route('surat-jalan.index');
+        }
+
+        $hasQueryParams = $request->has('search') ||
+            $request->has('sppg') ||
+            $request->has('date_filter') ||
+            $request->has('date_from') ||
+            $request->has('date_to') ||
+            $request->has('page');
+
+        if ($hasQueryParams) {
+            $filters = [
+                'search' => $request->string('search')->toString(),
+                'sppg' => $request->string('sppg')->toString(),
+                'date_filter' => $request->string('date_filter')->toString() ?: 'all',
+                'date_from' => $request->string('date_from')->toString(),
+                'date_to' => $request->string('date_to')->toString(),
+                'page' => $request->string('page')->toString(),
+            ];
+            $request->session()->put('sj_filters', $filters);
+        } else {
+            if ($request->session()->has('sj_filters')) {
+                return redirect()->route('surat-jalan.index', $request->session()->get('sj_filters'));
+            }
+        }
+
         $filters = $request->validate([
             'search' => ['nullable', 'string', 'max:120'],
             'sppg' => ['nullable', 'string', 'exists:sppgs,code'],
@@ -157,13 +186,13 @@ class DeliveryNoteController extends Controller
 
         $hasPhoto = count(array_filter($uploadedPhotos)) > 0 || $proofPhotoPath !== null;
 
-        DB::transaction(function () use ($order, $validated, $uploadedPhotos, $hasPhoto, $proofPhotoPath, $canUpdateItemValues): void {
+        DB::transaction(function () use ($order, $validated, $uploadedPhotos, $hasPhoto, $proofPhotoPath, $canUpdateItemValues, $existingDeliveryNote): void {
             $order->deliveryNote()->updateOrCreate(
                 ['purchase_order_id' => $order->id],
                 [
                     'number' => $validated['surat_jalan_no'],
-                    'date' => now()->toDateString(),
-                    'time' => now()->format('H:i'),
+                    'date' => $existingDeliveryNote ? $existingDeliveryNote->date->toDateString() : now()->toDateString(),
+                    'time' => $existingDeliveryNote ? ($existingDeliveryNote->time ? substr((string) $existingDeliveryNote->time, 0, 5) : now()->format('H:i')) : now()->format('H:i'),
                     'driver' => $validated['driver'] ?: 'Nama Pengirim',
                     'notes' => $validated['notes'] ?: '-',
                     'kepada' => $validated['kepada'],
@@ -188,7 +217,11 @@ class DeliveryNoteController extends Controller
                 ]);
             }
 
-            $order->update(['status' => 'INVOICED']);
+            $order->update([
+                'status' => 'INVOICED',
+                'droping_date' => $validated['delivery_date'],
+                'droping_time' => $validated['delivery_time'] ?? null,
+            ]);
         });
 
         return redirect()->route('surat-jalan.show', $order->id)->with('success', 'Surat Jalan berhasil disimpan.');
@@ -235,10 +268,14 @@ class DeliveryNoteController extends Controller
         ]);
 
         $order = $this->findOrderArray($id);
+        $existingDelivery = $order['delivery'] ?? null;
+        $order['droping_date'] = $validated['delivery_date'];
+        $order['droping_time'] = $validated['delivery_time'] ?? null;
+
         $order['delivery'] = [
             'number' => $validated['surat_jalan_no'],
-            'date' => $validated['delivery_date'],
-            'time' => $validated['delivery_time'] ?? null,
+            'date' => $existingDelivery ? $existingDelivery['date'] : now()->toDateString(),
+            'time' => $existingDelivery ? $existingDelivery['time'] : now()->format('H:i'),
             'driver' => $validated['driver'] ?: 'Nama Pengirim',
             'notes' => $validated['notes'] ?: '-',
             'kepada' => $validated['kepada'],
@@ -246,9 +283,9 @@ class DeliveryNoteController extends Controller
             'nama_sppg' => $validated['nama_sppg'],
             'pj_sppg' => $validated['pj_sppg'] ?: '-',
             'whatsapp' => $validated['whatsapp'] ?: '-',
-            'has_photo' => false,
-            'proof_photo' => null,
-            'item_photos' => [],
+            'has_photo' => $existingDelivery ? $existingDelivery['has_photo'] : false,
+            'proof_photo' => $existingDelivery ? $existingDelivery['proof_photo'] : null,
+            'item_photos' => $existingDelivery ? $existingDelivery['item_photos'] : [],
         ];
 
         foreach ($order['items'] as $index => $item) {

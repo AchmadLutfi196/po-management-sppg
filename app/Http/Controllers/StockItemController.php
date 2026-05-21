@@ -19,6 +19,31 @@ class StockItemController extends Controller
             return $redirect;
         }
 
+        if ($request->has('clear')) {
+            $request->session()->forget('stok_filters');
+
+            return redirect()->route('master-stok.index');
+        }
+
+        $hasFilterParams = $request->has('search') || $request->has('page');
+
+        if ($hasFilterParams) {
+            $filters = [
+                'search' => $request->string('search')->toString(),
+                'page' => $request->string('page')->toString(),
+            ];
+            $request->session()->put('stok_filters', $filters);
+        } else {
+            if ($request->session()->has('stok_filters')) {
+                $queryParams = array_merge(
+                    $request->session()->get('stok_filters'),
+                    $request->only(['edit', 'mode'])
+                );
+
+                return redirect()->route('master-stok.index', $queryParams);
+            }
+        }
+
         $items = StockItem::query()
             ->when($request->filled('search'), fn (Builder $query): Builder => $query->whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($request->string('search')->toString()).'%']))
             ->latest('id')

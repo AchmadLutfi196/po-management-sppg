@@ -4,20 +4,29 @@
     <style>
         .surat-jalan-filter-grid {
             display: grid;
-            grid-template-columns: minmax(160px, 1fr) minmax(170px, 1fr) 120px 130px 130px 105px 90px;
-            gap: 0.5rem;
+            grid-template-columns: minmax(130px, 1.2fr) minmax(110px, 1.1fr) minmax(85px, 0.85fr) minmax(85px, 0.85fr) minmax(85px, 0.85fr) auto auto;
+            gap: 0.375rem;
             align-items: end;
         }
 
-        @media (max-width: 1180px) {
+        @media (max-width: 1023px) {
             .surat-jalan-filter-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 0.5rem;
             }
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
             .surat-jalan-filter-grid {
-                grid-template-columns: minmax(0, 1fr);
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .surat-jalan-filter-grid {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
             }
         }
     </style>
@@ -75,7 +84,7 @@
                         </label>
                     </div>
                     <button type="submit" class="h-10 rounded-lg bg-blue-600 px-5 text-xs font-black uppercase tracking-wide text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700">Terapkan</button>
-                    <a href="{{ route('surat-jalan.index') }}" class="flex h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-5 text-xs font-black uppercase tracking-wide text-slate-500 transition hover:bg-slate-50">Reset</a>
+                    <a href="{{ route('surat-jalan.index', ['clear' => 1]) }}" class="flex h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-5 text-xs font-black uppercase tracking-wide text-slate-500 transition hover:bg-slate-50">Reset</a>
                 </div>
             </div>
         </form>
@@ -86,12 +95,12 @@
                 <table class="w-full min-w-[820px] text-sm">
                     <thead class="bg-slate-50/80">
                         <tr>
-                            <th class="w-12 px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">No</th>
-                            <th class="w-64 px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Identitas PO</th>
-                            <th class="px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Barang</th>
-                            <th class="w-48 px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Info Pengiriman</th>
-                            <th class="w-32 px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Bukti Drop</th>
-                            <th class="w-36 px-3 py-2.5 text-right text-[10px] font-bold uppercase tracking-wide text-slate-400">{{ $currentUser['role'] === 'ADMIN' ? 'Opsi' : 'Detail' }}</th>
+                            <th class="w-[4%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">No</th>
+                            <th class="w-[25%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Identitas PO</th>
+                            <th class="w-[27%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Barang</th>
+                            <th class="w-[18%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Info Pengiriman</th>
+                            <th class="w-[9%] px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">Bukti Drop</th>
+                            <th class="w-[9%] px-3 py-2.5 text-right text-[10px] font-bold uppercase tracking-wide text-slate-400">{{ $currentUser['role'] === 'ADMIN' ? 'Opsi' : 'Detail' }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -141,14 +150,14 @@
                                     @if ($hasDelivery)
                                         <p class="max-w-[180px] truncate text-xs font-black text-slate-950">{{ $order['delivery']['number'] }}</p>
                                         <p class="mt-1 text-[10px] font-bold text-emerald-600">
-                                            {{ date('d/m/Y', strtotime($order['delivery']['date'])) }}
-                                            @php
-                                                $jamKirim = $order['delivery']['time'] ?? $order['droping_time'] ?? null;
-                                            @endphp
-                                            @if (! empty($jamKirim))
-                                                · {{ $jamKirim }}
+                                            {{ !empty($order['droping_date']) ? date('d/m/Y', strtotime($order['droping_date'])) : '-' }}
+                                            @if (! empty($order['droping_time']))
+                                                · {{ $order['droping_time'] }}
                                             @endif
                                         </p>
+                                        @if (! empty($order['delivery']['date']))
+                                            <p class="mt-0.5 text-[9px] italic text-slate-400">Tgl Diterima: {{ date('d/m/Y', strtotime($order['delivery']['date'])) }}@if (!empty($order['delivery']['time'])), {{ $order['delivery']['time'] }}@endif</p>
+                                        @endif
                                         @if (! empty($order['delivery']['driver']))
                                             <p class="mt-0.5 text-[10px] font-semibold text-slate-500">Driver: {{ $order['delivery']['driver'] }}</p>
                                         @endif

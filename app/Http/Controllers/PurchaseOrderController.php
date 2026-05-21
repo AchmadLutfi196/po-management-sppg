@@ -22,6 +22,29 @@ class PurchaseOrderController extends Controller
             return $redirect;
         }
 
+        if ($request->has('clear')) {
+            $request->session()->forget('po_filters');
+
+            return redirect()->route('purchase-orders.index');
+        }
+
+        $hasQueryParams = $request->has('search') || $request->has('status') || $request->has('po_date') || $request->has('drop_date') || $request->has('page');
+
+        if ($hasQueryParams) {
+            $filters = [
+                'search' => $request->string('search')->toString(),
+                'status' => $request->string('status')->toString(),
+                'po_date' => $request->string('po_date')->toString(),
+                'drop_date' => $request->string('drop_date')->toString(),
+                'page' => $request->string('page')->toString(),
+            ];
+            $request->session()->put('po_filters', $filters);
+        } else {
+            if ($request->session()->has('po_filters')) {
+                return redirect()->route('purchase-orders.index', $request->session()->get('po_filters'));
+            }
+        }
+
         $query = $this->visibleOrdersQuery();
         $search = strtolower($request->string('search')->toString());
         $status = $request->string('status')->toString();

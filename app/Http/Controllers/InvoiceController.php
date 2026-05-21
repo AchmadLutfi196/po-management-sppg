@@ -25,7 +25,61 @@ class InvoiceController extends Controller
             return $redirect;
         }
 
-        $orders = $this->visibleOrdersQuery()->latest('id')->get();
+        if ($request->has('clear')) {
+            $request->session()->forget('invoice_filters');
+
+            return redirect()->route('invoices.index', ['tab' => $request->string('tab')->toString() ?: 'pending']);
+        }
+
+        $hasQueryParams = $request->has('search') ||
+            $request->has('status') ||
+            $request->has('supplier') ||
+            $request->has('sppg') ||
+            $request->has('date_filter') ||
+            $request->has('date_from') ||
+            $request->has('date_to') ||
+            $request->has('invoice_date') ||
+            $request->has('po_date') ||
+            $request->has('drop_date') ||
+            $request->has('page') ||
+            $request->has('tab');
+
+        if ($hasQueryParams) {
+            $filters = [
+                'tab' => $request->string('tab')->toString() ?: 'pending',
+                'search' => $request->string('search')->toString(),
+                'status' => $request->string('status')->toString() ?: 'all',
+                'supplier' => $request->string('supplier')->toString(),
+                'sppg' => $request->string('sppg')->toString(),
+                'date_filter' => $request->string('date_filter')->toString() ?: 'all',
+                'date_from' => $request->string('date_from')->toString(),
+                'date_to' => $request->string('date_to')->toString(),
+                'invoice_date' => $request->string('invoice_date')->toString(),
+                'po_date' => $request->string('po_date')->toString(),
+                'drop_date' => $request->string('drop_date')->toString(),
+                'page' => $request->string('page')->toString(),
+            ];
+            $request->session()->put('invoice_filters', $filters);
+        } else {
+            if ($request->session()->has('invoice_filters')) {
+                return redirect()->route('invoices.index', $request->session()->get('invoice_filters'));
+            }
+        }
+
+        $poDate = $request->string('po_date')->toString();
+        $dropDate = $request->string('drop_date')->toString();
+
+        $ordersQuery = $this->visibleOrdersQuery();
+
+        if ($poDate !== '') {
+            $ordersQuery->whereDate('date', $poDate);
+        }
+
+        if ($dropDate !== '') {
+            $ordersQuery->whereDate('droping_date', $dropDate);
+        }
+
+        $orders = $ordersQuery->latest('id')->get();
         $visibleOrderIds = $orders->pluck('id');
 
         $filters = $request->validate([
@@ -118,7 +172,7 @@ class InvoiceController extends Controller
     }
 
     /**
-     * @param  array{search: string, status: string, supplier: string, sppg: string, date_filter: string, date_from: string, date_to: string}  $filters
+     * @param  array{search: string, status: string, supplier: string, sppg: string, date_filter: string, date_from: string, date_to: string, invoice_date: string}  $filters
      */
     private function applyHistoryInvoiceFilters(Builder $query, array $filters): void
     {
@@ -149,6 +203,10 @@ class InvoiceController extends Controller
 
         if ($filters['sppg'] !== '') {
             $query->whereHas('purchaseOrder.sppg', fn (Builder $sppg): Builder => $sppg->where('code', $filters['sppg']));
+        }
+
+        if (! empty($filters['invoice_date'])) {
+            $query->whereDate('date', $filters['invoice_date']);
         }
 
         if ($filters['date_filter'] === 'today') {

@@ -22,6 +22,31 @@ class SppgController extends Controller
 
         $this->authorizeAdmin();
 
+        if ($request->has('clear')) {
+            $request->session()->forget('sppg_filters');
+
+            return redirect()->route('master-sppg.index');
+        }
+
+        $hasFilterParams = $request->has('search') || $request->has('page');
+
+        if ($hasFilterParams) {
+            $filters = [
+                'search' => $request->string('search')->toString(),
+                'page' => $request->string('page')->toString(),
+            ];
+            $request->session()->put('sppg_filters', $filters);
+        } else {
+            if ($request->session()->has('sppg_filters')) {
+                $queryParams = array_merge(
+                    $request->session()->get('sppg_filters'),
+                    $request->only(['edit', 'mode'])
+                );
+
+                return redirect()->route('master-sppg.index', $queryParams);
+            }
+        }
+
         $sppgs = Sppg::query()
             ->when($request->filled('search'), function (Builder $query) use ($request): Builder {
                 $search = strtolower($request->string('search')->toString());

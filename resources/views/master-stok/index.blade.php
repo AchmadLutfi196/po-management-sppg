@@ -8,7 +8,10 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z" />
                     </svg>
-                    <input name="search" value="{{ $filters['search'] }}" placeholder="Cari nama barang..." class="h-12 w-full rounded-lg border border-slate-200 bg-slate-50 pl-14 pr-4 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10">
+                    <input name="search" value="{{ $filters['search'] }}" placeholder="Cari nama barang..." class="h-12 w-full rounded-lg border border-slate-200 bg-slate-50 pl-14 pr-10 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10">
+                    @if(!empty($filters['search']))
+                        <a href="{{ route('master-stok.index', ['clear' => 1]) }}" class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400 hover:text-slate-600" title="Reset">✕</a>
+                    @endif
                 </form>
 
                 @if ($currentUser['role'] === 'ADMIN')
