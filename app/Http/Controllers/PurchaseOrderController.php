@@ -227,6 +227,35 @@ class PurchaseOrderController extends Controller
             if ($order->invoices()->doesntExist()) {
                 $this->publishOrResplitPurchaseOrder($order->refresh());
             }
+
+            // Auto-tambahkan item baru ke invoice existing untuk supplier yang sama
+            $order->refresh();
+            $newPoItems = $order->items()->where('is_invoiced', false)->with('supplier')->get();
+            foreach ($newPoItems as $poItem) {
+                if (! $poItem->supplier) {
+                    continue;
+                }
+
+                $existingInvoice = $order->invoices()
+                    ->where('supplier_name', $poItem->supplier->name)
+                    ->first();
+
+                if ($existingInvoice) {
+                    $subtotal = (int) ($poItem->qty * $poItem->price);
+                    $existingInvoice->items()->create([
+                        'purchase_order_item_id' => $poItem->id,
+                        'name' => $poItem->name,
+                        'qty' => $poItem->qty,
+                        'unit' => $poItem->unit,
+                        'price' => $poItem->price,
+                        'subtotal' => $subtotal,
+                    ]);
+                    $existingInvoice->update([
+                        'total_amount' => $existingInvoice->items()->sum('subtotal'),
+                    ]);
+                    $poItem->update(['is_invoiced' => true]);
+                }
+            }
         });
 
         session()->forget('po_filters');
