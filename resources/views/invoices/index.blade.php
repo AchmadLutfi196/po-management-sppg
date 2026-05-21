@@ -321,16 +321,9 @@
                                         @endif
                                     </td>
                                     <td class="px-3 py-3 text-right">
-                                        <div class="flex items-center justify-end gap-1.5">
-                                            @if ($currentUser['role'] === 'ADMIN')
-                                                <a href="{{ route('invoices.edit', ['id' => $entry['order']['id'], 'invoice' => $invoice['number']]) }}" class="inline-flex items-center rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-700 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600" title="Edit Invoice">
-                                                    Edit
-                                                </a>
-                                            @endif
-                                            <a href="{{ route('invoices.preview', ['id' => $entry['order']['id'], 'invoice' => $invoice['number'], 'supplier' => $invoice['supplier']]) }}" class="inline-flex items-center rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-700 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600">
-                                                Cetak
-                                            </a>
-                                        </div>
+                                        <a href="{{ route('invoices.preview', ['id' => $entry['order']['id'], 'invoice' => $invoice['number'], 'supplier' => $invoice['supplier']]) }}" class="inline-flex items-center rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-700 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600">
+                                            Cetak
+                                        </a>
                                     </td>
                                 </tr>
                             @empty
