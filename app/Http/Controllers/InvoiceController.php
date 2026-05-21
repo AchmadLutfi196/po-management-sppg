@@ -47,6 +47,8 @@ class InvoiceController extends Controller
             'date_filter' => ['nullable', 'in:all,today,range'],
             'date_from' => ['nullable', 'date'],
             'date_to' => ['nullable', 'date'],
+            'po_date' => ['nullable', 'date'],
+            'drop_date' => ['nullable', 'date'],
             'po_date_from' => ['nullable', 'date'],
             'po_date_to' => ['nullable', 'date'],
             'drop_from' => ['nullable', 'date'],
@@ -61,6 +63,8 @@ class InvoiceController extends Controller
             'date_filter' => $filters['date_filter'] ?? 'all',
             'date_from' => $filters['date_from'] ?? '',
             'date_to' => $filters['date_to'] ?? '',
+            'po_date' => $filters['po_date'] ?? '',
+            'drop_date' => $filters['drop_date'] ?? '',
             'po_date_from' => $filters['po_date_from'] ?? '',
             'po_date_to' => $filters['po_date_to'] ?? '',
             'drop_from' => $filters['drop_from'] ?? '',
@@ -92,6 +96,8 @@ class InvoiceController extends Controller
 
         $pendingInvoices = $orders
             ->filter(fn (PurchaseOrder $order): bool => in_array($order->status, ['PROCESSING', 'COMPLETED', 'INVOICED'], true))
+            ->when($filters['po_date'] !== '', fn (Collection $col) => $col->filter(fn (PurchaseOrder $order): bool => $order->date?->format('Y-m-d') === $filters['po_date']))
+            ->when($filters['drop_date'] !== '', fn (Collection $col) => $col->filter(fn (PurchaseOrder $order): bool => $order->droping_date?->format('Y-m-d') === $filters['drop_date']))
             ->flatMap(function (PurchaseOrder $order) use ($publishedKeys): array {
                 return $order->items
                     ->filter(fn (PurchaseOrderItem $item): bool => ! $item->is_invoiced)

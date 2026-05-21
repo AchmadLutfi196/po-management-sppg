@@ -8,7 +8,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <style>
             @page {
-                size: A5 landscape;
+                size: A5 portrait;
                 margin: 8mm;
             }
 
@@ -22,8 +22,8 @@
             }
 
             .sj-paper {
-                width: 210mm;
-                min-height: 148mm;
+                width: 148mm;
+                min-height: 210mm;
                 font-size: 10.5px;
             }
 
@@ -64,7 +64,7 @@
             <div class="flex items-center gap-4">
                 <a href="{{ route('surat-jalan.show', $order['id']) }}" class="text-2xl leading-none text-slate-500 hover:text-slate-900">&times;</a>
                 <h1 class="text-base font-black tracking-tight text-slate-900">Preview Surat Jalan</h1>
-                <span class="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">A5 Landscape</span>
+                <span class="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">A5 Portrait</span>
             </div>
             <div class="flex items-center gap-2">
                 <button type="button" onclick="window.print()" class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50">Print</button>

@@ -58,7 +58,7 @@ trait ProcurementHelpers
                 'name' => $stockItem?->name ?? $itemData['name'],
                 'grade' => $itemData['grade'],
                 'qty' => $itemData['qty'],
-                'unit' => strtoupper($stockItem?->unit ?? $itemData['unit']),
+                'unit' => strtoupper($itemData['unit'] ?? $stockItem?->unit ?? 'KG'),
                 'price' => $itemData['price'],
                 'request_note' => $itemData['request'] ?? null,
                 'is_invoiced' => false,

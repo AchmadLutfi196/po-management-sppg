@@ -152,7 +152,11 @@
                                                     </button>
                                                 </form>
                                             @else
-                                                <a href="{{ route('master-stok.show', $item['id']) }}" class="text-xs font-black uppercase tracking-wider text-blue-600">View</a>
+                                                @if (!empty($item['image']))
+                                                    <button type="button" onclick="openImageModal('{{ asset('storage/'.$item['image']) }}', '{{ $item['name'] }}')" class="text-slate-400 transition hover:text-blue-600" title="Lihat foto">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                    </button>
+                                                @endif
                                             @endif
                                         </div>
                                     </td>
